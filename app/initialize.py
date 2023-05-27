@@ -1,0 +1,1 @@
+print(' INITIALIZE '.center(50, '='))
