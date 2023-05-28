@@ -8,7 +8,7 @@ WORKDIR /usr/data/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN addgroup -S appuser && adduser -S appuser -G appuser  --home /usr/data
+# RUN addgroup -S appuser && adduser -S appuser -G appuser  --home /usr/data
 
 ENV PATH=$PATH:/usr/data/.local/bin
 
@@ -17,9 +17,9 @@ COPY ./requirements.txt .
 COPY . .
 RUN pip install -r requirements.txt
 
-RUN chown -R appuser:appuser /usr/data
+# RUN chown -R appuser:appuser /usr/data
 
-USER appuser:appuser
+# USER appuser:appuser
 
 EXPOSE 5000/tcp
 

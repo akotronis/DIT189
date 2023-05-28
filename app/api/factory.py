@@ -2,15 +2,23 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask
-from flask_smorest import Api
+from flask_oidc_ext import OpenIDConnect
 
-from config.config import config_by_name
-from db import db
+from .config.config import config_by_name
+from .db import db
+
+
+from .keycloak import KeycloakAPI
 
 # Necessary for creating tables
-import models
+from .models import *
 
 
+# Connect OpenIDConnect to the app
+oidc = OpenIDConnect()
+
+
+# Function creating app object
 def create_app(config_name):
     app = Flask(__name__)
 
@@ -19,16 +27,11 @@ def create_app(config_name):
 
     # Load environment variables from .env (.flaskenv)
     load_dotenv()
-    
+
     # Initialize Flask-SQLAlchemy and pass app object to connect with
     db.init_app(app)
 
-    # Connect flask_smorest to the app
-    api = Api(app)
-
-    # Not needed with Flask-Migrate
-    with app.app_context():
-        # Create tables IF NOT EXIST
-        db.create_all() 
+    # Initialize OpenIDConnect and pass app object to connect with
+    oidc.init_app(app)
 
     return app

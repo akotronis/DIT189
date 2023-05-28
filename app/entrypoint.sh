@@ -1,3 +1,3 @@
 #!/bin/sh
-python initialize.py
+python -m api.initialize
 python run.py
