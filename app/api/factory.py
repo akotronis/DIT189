@@ -8,8 +8,6 @@ from .config.config import config_by_name
 from .db import db
 
 
-from .keycloak import KeycloakAPI
-
 # Necessary for creating tables
 from .models import *
 
