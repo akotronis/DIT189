@@ -25,24 +25,24 @@ class DataBase:
         User.query.delete()
         Marriage.query.delete()
         UsersMarriages.query.delete()
+        Divorce.query.delete()
+        UsersDivorces.query.delete()
 
-    def get_or_create(self, model, **kwargs):
+    def get_or_create_user(self, **kwargs):
         email = kwargs.get('email')
-        instance = db.session.query(model).filter_by(email=email).first()
-        if instance:
-            return instance
-        else:
-            instance = model(**kwargs)
-            db.session.add(instance)
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(**kwargs)
+            db.session.add(user)
             db.session.commit()
-            return instance
+        return user
 
-    def make_couples(self):
-        spouses = list(db.session.query(User).filter(User.role==User.Types.SPOUSE))
+    def make_marriages(self):
+        spouses = list(User.query.filter(User.role==User.Types.SPOUSE))
         couples = [spouses[i:i + 2] for i in range(0, len(spouses), 2)]
         couples = [x for x in couples if len(x) == 2]
         for spouse_1, spouse_2 in couples:
-            marriage = Marriage(start_date=self.random_date())
+            marriage = Marriage(start_date=self.random_date(), in_use=True)
             spouse_1.marriages.append(marriage)
             spouse_2.marriages.append(marriage)
             db.session.add(marriage)
@@ -60,7 +60,17 @@ class DataBase:
                 'last_name':f'first_name{num}',
                 'role':random.choice(list(User.Types.__members__.keys()))
             }
-            self.get_or_create(User, **user_data)
+            self.get_or_create_user(**user_data)
+
+    @staticmethod
+    def get_active_marriages():
+        '''Fetch active marriages for selection to start divorce process'''
+        # TODO: Specify Data Format
+        print([m.users for m in Marriage.query.filter_by(in_use=True).all()])
+
+    @staticmethod
+    def start_divorce(marriage_id):
+        ...
 
     def initialize(self):
         # Clear tables contents
@@ -70,4 +80,4 @@ class DataBase:
         self.make_users()
 
         # Create marriages
-        self.make_couples()
+        self.make_marriages()

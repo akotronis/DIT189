@@ -9,7 +9,7 @@ from ..db import db
 class Divorce(db.Model):
 
     class DivorceStatus(enum.Enum):
-        STARTED = 1
+        STARTED = 1 # Is it needed? It is the same with 2
         WAIT_LAWYER_2 = 2
         WAIT_SPOUSES = 3
         WAIT_10DAY = 4
@@ -19,6 +19,7 @@ class Divorce(db.Model):
 
     __tablename__ = 'divorces'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    marriage_id = db.Column(UUID(as_uuid=True), db.ForeignKey('marriages.id'))
     status = db.Column(Enum(DivorceStatus), nullable=True)
     start_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)

@@ -22,6 +22,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True)
     role = db.Column(Enum(Types))
     marriages = db.relationship('Marriage', back_populates='users', secondary='users_marriages')
+    divorces = db.relationship('Divorce', back_populates='users', secondary='users_divorces')
 
     def __repr__(self):
         return f'<User "{self.email}">'
