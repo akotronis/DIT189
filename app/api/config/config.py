@@ -13,14 +13,7 @@ class Config:
     OPENAPI_SWAGGER_UI_PATH = "/swagger-ui"
     OPENAPI_SWAGGER_UI_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     SECRET_KEY = os.getenv('SECRET_KEY')
-    # Keycloak
-    OIDC_CLIENT_SECRETS = os.path.join(os.getcwd(), 'api', 'client_secrets.json')
-    OIDC_OPENID_REALM = 'DemoRealm'
-    # 'OIDC_INTROSPECTION_AUTH_METHOD': 'bearer'
-    # 'OIDC_INTROSPECTION_AUTH_METHOD': 'client_secret_post'
-    OIDC_SCOPES = ['openid', 'email', 'profile']
-    # 'OIDC_TOKEN_TYPE_HINT': 'access_token'
-    # 'OIDC_RESOURCE_SERVER_ONLY': True
+
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('PROD_DATABASE_URL')

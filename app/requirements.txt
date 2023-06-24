@@ -17,8 +17,9 @@ psycopg2-binary==2.9.6
 ######## Keycloak ########
 # flask-oidc==1.4.0
 # itsdangerous==1.1.0
-flask-oidc-ext==1.4.5
-itsdangerous==2.1.2
+# flask-oidc-ext==1.4.5
+# itsdangerous==2.1.2
+python-keycloak==3.1.1
 ######## For Authentication ########
 # flask-jwt-extended==4.4.4
 passlib==1.7.1

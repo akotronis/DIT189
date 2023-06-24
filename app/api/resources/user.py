@@ -5,45 +5,47 @@ from flask_smorest import Blueprint, abort
 # from passlib.hash import pbkdf2_sha256
 from sqlalchemy.exc import IntegrityError
 
+from ..database import DataBase
 from ..db import db
 from ..models import User
-from ..factory import oidc
 from ..keycloak import KeycloakAPI
 # from schemas import UserSchema
 
 
 blp = Blueprint('Users', __name__)
-
+kclk = KeycloakAPI()
 
 @blp.route('/users')
 class UserTest(MethodView):
-    @oidc.require_login
+    @kclk.token_required
     def get(self):
-        info = oidc.user_getinfo(['preferred_username', 'email', 'sub'])
-
-        username = info.get('preferred_username')
-        email = info.get('email')
-        user_id = info.get('sub')
-        kc = KeycloakAPI()
-        kc.delete_user(user_id)
-        return {'message': 'Successfully logged out.'}
+        print(kclk.token_info)
+        return {'message': 'Successfully authenticated.'}
 
 
 @blp.route('/users/logout')
 class Logout(MethodView):
-    @oidc.require_login
     def get(self):
-        issuer_url = oidc.client_secrets.get('issuer')
+        issuer_url = None #oidc.client_secrets.get('issuer')
         hosturl = os.getenv('HOST_MAIN_URL')
-        oidc.logout()
+        # oidc.logout()
         return redirect(f'{issuer_url}/protocol/openid-connect/logout?redirect_uri={hosturl}')
 
 
 @blp.route('/')
 class Dum(MethodView):
     def get(self):
-        
-        return {'message': 'HELLO'}
+        DataBase.get_active_marriages()
+        return {'message': 'GET'}
+    
+    def post(self):
+        # print(g.oidc_token_info['sub'])
+        # print(request.headers)
+        # print(request.form)
+        print('============== 11 =================')
+        print('=============== 22 ================')
+        # print('\n'.join(dir(oidc)))
+        return {'message': 'POST'}
 
 # @blp.route('/users/register')
 # class UserRegister(MethodView):

@@ -92,16 +92,18 @@ services:
     volumes:
       - ./:/usr/data/app
     environment:
-
-      # Keycloak
-      KEYCLOAK_AUTH_URI: http://keycloak-srv:8080/auth
+      # App main page
       HOST_MAIN_URL: http://localhost:5000
+      # Keycloak
+      KEYCLOAK_URI: http://keycloak-srv:8080
+      ADMIN_REALM: master
+      ADMIN_CLIENT_ID: admin-cli
       REALM: ${REALM}
-      # CLIENT_ID: ${CLIENT_ID}
-      # CLIENT_SECRET: ${CLIENT_SECRET}
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
       # OPENID_URL: http://keycloak-srv:8080/auth/realms/${REALM}/protocol/openid-connect/auth
-      # ADMIN_USER: ${KEYCLOAK_USER}
-      # ADMIN_PASS: ${KEYCLOAK_PASSWORD}
+      KEYCLOACK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOACK_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
       # Main-db
       DEV_DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@api-db/${API_DB}
     depends_on:
