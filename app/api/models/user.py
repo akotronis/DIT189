@@ -12,6 +12,38 @@ class User(db.Model):
         SPOUSE = 1
         LAWYER = 2
         NOTARY = 3
+    
+        @classmethod
+        @property
+        def names(cls):
+            return cls.__members__.keys()
+        
+        @classmethod
+        @property
+        def values(cls):
+            return cls.__members__.values()
+        
+        @classmethod
+        def filter_keys(cls, names=None, output='types'):
+            """
+            Filter by values in a names list like ['spouse', 'lawyer'] case insensitive
+            and return:
+            output='names' -> names (list of str)
+            output='types' -> enum types (list o enum types)
+            output='both' -> both (list of tuples (str, enum type))
+            """
+            names = list(map(lambda x: x.upper(), names or []))
+            result = []
+            for name, v in cls.__members__.items():
+                if name  in names:
+                    if output == 'names':
+                        item = name
+                    elif output == 'types':
+                        item = v
+                    else:
+                        item = (name, v)
+                    result.append(item)
+            return result
 
     __tablename__ = 'users'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

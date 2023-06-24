@@ -15,11 +15,18 @@ from ..keycloak import KeycloakAPI
 blp = Blueprint('Users', __name__)
 kclk = KeycloakAPI()
 
+
 @blp.route('/users')
-class UserTest(MethodView):
-    @kclk.token_required
-    def get(self):
-        print(kclk.token_info)
+class UserList(MethodView):
+    # @kclk.token_required()
+    # @kclk.token_required('NOTARY')
+    def get(self):#, query_args, **kwargs):
+        """
+        Accepts query params:
+            multiple key:value of type &role=spouse&role=lawyer etc
+        """
+        query_params = request.args.to_dict(flat=False)
+        users = DataBase.get_users(role=query_params.get('role', []))
         return {'message': 'Successfully authenticated.'}
 
 

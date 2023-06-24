@@ -5,6 +5,8 @@ from flask_smorest import abort
 from keycloak import KeycloakAdmin, KeycloakOpenID, KeycloakOpenIDConnection
 # import requests
 
+from .database import DataBase
+
 
 class KeycloakAPI:
     def __init__(self):
@@ -40,7 +42,7 @@ class KeycloakAPI:
         self.change_realm(self.realm)
 
         # This will store daat from the decoded token, if decoding is successful
-        token_info = None
+        self.token_info = None
 
     def get_token_from_credentials(self, username, password, key=None):
         try:
@@ -126,9 +128,11 @@ class KeycloakAPI:
             return self.update_user(user_id=user_id, user_data=data)
         self.admin.delete_user(user_id=user_id)
 
-    # Make it a property so taht it can be called without `()`
-    @property
-    def token_required(self):
+    def token_required(self, role=None):
+        """
+        Authenticate based on Keycloak token. If role is provided,
+        apply authorization based on role
+        """
         def decorator(func_to_decorate):
             """
             Decorator to use in endpoints to handle keycloak authentication
@@ -137,18 +141,16 @@ class KeycloakAPI:
             # like __name__, __doc__
             @wraps(func_to_decorate)
             def decorated_func(*args, **kwargs):
-                auth_header = request.headers.get('Authorization')
+                print(' IN DECORATOR '.center(80, '='))
+                auth_header = request.headers.get('Authorization', '')
                 error_data = {
                     'http_status_code': 401,
-                    'message': 'HTTP 401 Unauthorized',
+                    'message': 'HTTP 401 Unauthenticated',
                     'headers': {'WWW-Authenticate': 'Bearer'}
                 }
                 auth = auth_header.split()
-                if len(auth) == 1:
-                    error_data['message'] = 'Invalid token header. No credentials provided.'
-                    abort(**error_data)
-                elif len(auth) > 2:
-                    error_data['message'] = 'Invalid token header. Token string should not contain spaces.'
+                if len(auth) != 2 or not next(iter(auth), None) == 'Bearer':
+                    error_data['message'] = 'Invalid token header. Check token header format.'
                     abort(**error_data)
                 try:
                     token = auth[1]
@@ -156,6 +158,15 @@ class KeycloakAPI:
                 except Exception as e:
                     error_data['message'] = str(e)
                     abort(**error_data)
+                if role:
+                    user = DataBase.get_users(many=False, email=self.token_info.get('email'))
+                    print(user.role.name, role.upper())
+                    if user.role.name != role.upper():
+                        error_data = {
+                            'http_status_code': 403,
+                            'message': 'HTTP 403 Unauthorized'
+                        }
+                        abort(**error_data)
                 return func_to_decorate(*args, **kwargs)
             return decorated_func
         return decorator

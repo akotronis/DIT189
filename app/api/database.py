@@ -22,33 +22,49 @@ class DataBase:
 
     @staticmethod
     def clean_tables():
-        User.query.delete()
-        Marriage.query.delete()
+        """
+        Delete in specific order to avoid Foreign key errors
+        """
         UsersMarriages.query.delete()
-        Divorce.query.delete()
         UsersDivorces.query.delete()
+        Marriage.query.delete()
+        Divorce.query.delete()
+        User.query.delete()
 
-    def get_or_create_user(self, **kwargs):
-        email = kwargs.get('email')
-        user = User.query.filter_by(email=email).first()
+    @classmethod
+    def get_or_create_user(cls, **kwargs):
+        user = User.query.filter_by(**kwargs).first()
         if not user:
             user = User(**kwargs)
             db.session.add(user)
             db.session.commit()
         return user
+    
+    @classmethod
+    def get_users(cls, many=True, **kwargs):
+        users = User.query
+        if (roles := kwargs.pop('role', [])):
+            role_types = User.Types.filter_keys(roles)
+            users = users.filter(User.role.in_(role_types))
+        users = users.filter_by(**kwargs)
+        if many:
+            return users.all()
+        return users.first()
 
-    def make_marriages(self):
+    @classmethod
+    def make_marriages(cls):
         spouses = list(User.query.filter(User.role==User.Types.SPOUSE))
         couples = [spouses[i:i + 2] for i in range(0, len(spouses), 2)]
         couples = [x for x in couples if len(x) == 2]
         for spouse_1, spouse_2 in couples:
-            marriage = Marriage(start_date=self.random_date(), in_use=True)
+            marriage = Marriage(start_date=cls.random_date(), in_use=True)
             spouse_1.marriages.append(marriage)
             spouse_2.marriages.append(marriage)
             db.session.add(marriage)
         db.session.commit()
 
-    def make_users(self):
+    @classmethod
+    def make_users(cls):
         for i in range(1, 31):
             num = f'{i}'.zfill(2)
             vat_num = 1000 + i
@@ -60,7 +76,7 @@ class DataBase:
                 'last_name':f'first_name{num}',
                 'role':random.choice(list(User.Types.__members__.keys()))
             }
-            self.get_or_create_user(**user_data)
+            cls.get_or_create_user(**user_data)
 
     @staticmethod
     def get_active_marriages():
@@ -72,12 +88,13 @@ class DataBase:
     def start_divorce(marriage_id):
         ...
 
-    def initialize(self):
+    @classmethod
+    def initialize(cls):
         # Clear tables contents
-        DataBase.clean_tables()
+        cls.clean_tables()
 
         # Create users
-        self.make_users()
+        cls.make_users()
 
         # Create marriages
-        self.make_marriages()
+        cls.make_marriages()
