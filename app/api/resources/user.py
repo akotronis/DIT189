@@ -25,7 +25,7 @@ class UserList(MethodView):
     def get(self, query_args):
         """
         Accepts query params:
-            multiple key:value of type &role=spouse&role=lawyer etc
+            multiple key:value of type &role=SPOUSE&role=LAWYER etc
         """
         # Can also fetch by request.args.to_dict(flat=False).get('role', [])
         # but it won't be deserialized/validated
