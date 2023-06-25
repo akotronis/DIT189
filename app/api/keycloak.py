@@ -141,7 +141,6 @@ class KeycloakAPI:
             # like __name__, __doc__
             @wraps(func_to_decorate)
             def decorated_func(*args, **kwargs):
-                print(' IN DECORATOR '.center(80, '='))
                 auth_header = request.headers.get('Authorization', '')
                 error_data = {
                     'http_status_code': 401,

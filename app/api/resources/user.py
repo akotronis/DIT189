@@ -9,7 +9,7 @@ from ..database import DataBase
 from ..db import db
 from ..models import User
 from ..keycloak import KeycloakAPI
-# from schemas import UserSchema
+from ..schemas import UserInputSchema, UserOutputSchema#, UsersOutputSchema
 
 
 blp = Blueprint('Users', __name__)
@@ -18,16 +18,20 @@ kclk = KeycloakAPI()
 
 @blp.route('/users')
 class UserList(MethodView):
-    # @kclk.token_required()
     # @kclk.token_required('NOTARY')
-    def get(self):#, query_args, **kwargs):
+    # @kclk.token_required()
+    @blp.arguments(UserInputSchema, location='query')
+    @blp.response(200, UserOutputSchema(many=True))
+    def get(self, query_args):
         """
         Accepts query params:
             multiple key:value of type &role=spouse&role=lawyer etc
         """
-        query_params = request.args.to_dict(flat=False)
-        users = DataBase.get_users(role=query_params.get('role', []))
-        return {'message': 'Successfully authenticated.'}
+        # Can also fetch by request.args.to_dict(flat=False).get('role', [])
+        # but it won't be deserialized/validated
+        role = query_args.get('role', [])
+        users = DataBase.get_users(role=role)
+        return users
 
 
 @blp.route('/users/logout')

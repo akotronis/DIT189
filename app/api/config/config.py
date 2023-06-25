@@ -6,13 +6,15 @@ class Config:
     DEBUG = False
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    API_TITLE = 'BookAPI'
+    API_TITLE = 'DIT189'
     API_VERSION = 'v1'
     OPENAPI_VERSION = '3.0.2'
     OPENAPI_URL_PREFIX = "/"
     OPENAPI_SWAGGER_UI_PATH = "/swagger-ui"
     OPENAPI_SWAGGER_UI_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     SECRET_KEY = os.getenv('SECRET_KEY')
+    # Required for ordered=True to work in Schemas Meta classes
+    JSON_SORT_KEYS = False
 
 
 class ProductionConfig(Config):

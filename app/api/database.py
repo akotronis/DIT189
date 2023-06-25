@@ -43,13 +43,17 @@ class DataBase:
     @classmethod
     def get_users(cls, many=True, **kwargs):
         users = User.query
-        if (roles := kwargs.pop('role', [])):
-            role_types = User.Types.filter_keys(roles)
-            users = users.filter(User.role.in_(role_types))
+        if (role_list := kwargs.pop('role', [])):
+            # Make sure role_list is a list of enum types
+            role_list = [role_list] if isinstance(role_list, str) else role_list
+            if isinstance(next(iter(role_list), None), str):
+                role_list = User.Types.filter_keys(role_list)
+            users = users.filter(User.role.in_(role_list))
         users = users.filter_by(**kwargs)
         if many:
             return users.all()
         return users.first()
+    
 
     @classmethod
     def make_marriages(cls):
