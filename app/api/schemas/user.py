@@ -3,7 +3,7 @@ from marshmallow import Schema, fields
 from ..models import User
 
 
-class UserOutputSchema(Schema):
+class UserSchema(Schema):
     class Meta:
         ordered = True
     id = fields.UUID()
@@ -16,6 +16,9 @@ class UserOutputSchema(Schema):
 
 
 class UserInputSchema(Schema):
+    """
+    Validates inputs of the form ?role=LAWYER&role=SPOUCE single or multiple
+    """
     class Meta:
         ordered = True
     role = fields.List(fields.Enum(User.Types), required=False)

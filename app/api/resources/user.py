@@ -9,7 +9,7 @@ from ..database import DataBase
 from ..db import db
 from ..models import User
 from ..keycloak import KeycloakAPI
-from ..schemas import UserInputSchema, UserOutputSchema
+from ..schemas import UserInputSchema, UserSchema
 
 
 blp = Blueprint('Users', __name__)
@@ -19,9 +19,10 @@ kclk = KeycloakAPI()
 @blp.route('/users')
 class UserList(MethodView):
     # @kclk.token_required('NOTARY')
-    @kclk.token_required(['notary', 'lawyer'])
+    # @kclk.token_required(['notary', 'lawyer'])
+    @kclk.token_required()
     @blp.arguments(UserInputSchema, location='query')
-    @blp.response(200, UserOutputSchema(many=True))
+    @blp.response(200, UserSchema(many=True))
     def get(self, query_args):
         """
         Accepts query params:
