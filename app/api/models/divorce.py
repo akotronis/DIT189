@@ -25,6 +25,7 @@ class Divorce(db.Model):
     start_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)
     aggrement_text = db.Column(db.String, nullable=True)
+    marriage = db.relationship('Marriage', back_populates='divorces')
     users = db.relationship('User', back_populates='divorces', secondary='users_divorces')
 
     def __repr__(self):
