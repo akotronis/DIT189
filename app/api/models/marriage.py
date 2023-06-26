@@ -14,6 +14,7 @@ class Marriage(db.Model):
     end_date = db.Column(db.Date, nullable=True)
     in_use = db.Column(db.Boolean)
     users = db.relationship('User', back_populates='marriages', secondary='users_marriages')
+    divorces = db.relationship('Divorce', back_populates='marriage', lazy='dynamic')
 
     def __repr__(self):
         return f'<Marriage "{self.id}">'

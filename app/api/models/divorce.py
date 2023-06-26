@@ -8,7 +8,7 @@ from ..db import db
 
 class Divorce(db.Model):
 
-    class DivorceStatus(enum.Enum):
+    class Status(enum.Enum):
         STARTED = 1 # Is it needed? It is the same with 2
         WAIT_LAWYER_2 = 2
         WAIT_SPOUSES = 3
@@ -20,7 +20,8 @@ class Divorce(db.Model):
     __tablename__ = 'divorces'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     marriage_id = db.Column(UUID(as_uuid=True), db.ForeignKey('marriages.id'))
-    status = db.Column(Enum(DivorceStatus), nullable=True)
+    status = db.Column(Enum(Status), nullable=True)
+    cancelled_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'))
     start_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)
     aggrement_text = db.Column(db.String, nullable=True)
