@@ -128,7 +128,7 @@ class KeycloakAPI:
             return self.update_user(user_id=user_id, user_data=data)
         self.admin.delete_user(user_id=user_id)
 
-    def token_required(self, role=None):
+    def token_required(self, roles=None):
         """
         Authenticate based on Keycloak token. If role is provided,
         apply authorization based on role
@@ -157,10 +157,23 @@ class KeycloakAPI:
                 except Exception as e:
                     error_data['message'] = str(e)
                     abort(**error_data)
-                if role:
-                    user = DataBase.get_users(many=False, email=self.token_info.get('email'))
-                    print(user.role.name, role.upper())
-                    if user.role.name != role.upper():
+                # If got here, token is successfully authenticated
+                username=self.token_info.get('preferred_username')
+                # Fetch user from api database
+                user = DataBase.get_users(many=False, username=username)
+                # If not found
+                if user is None:
+                    # Delete user from keycloak
+                    self.delete_user(username)
+                    abort(**{'http_status_code': 404, 'message': 'User not found'})
+                # User is found in api database.
+                # Verify authorization if endpont is authorized based on role
+                if roles:
+                    if isinstance(roles, list):
+                        _roles = [role.upper() for role in roles]
+                    elif isinstance(roles, str):
+                        _roles = [roles.upper()]
+                    if user.role.name not in _roles:
                         error_data = {
                             'http_status_code': 403,
                             'message': 'HTTP 403 Unauthorized'
