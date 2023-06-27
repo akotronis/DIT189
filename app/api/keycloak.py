@@ -52,7 +52,11 @@ class KeycloakAPI:
             return {}
 
     def get_public_key(self):
-        return f'-----BEGIN PUBLIC KEY-----\n{self.openid.public_key()}\n-----END PUBLIC KEY-----'
+        try:
+            return f'-----BEGIN PUBLIC KEY-----\n{self.openid.public_key()}\n-----END PUBLIC KEY-----'
+        except Exception as e:
+            if 'Realm does not exist' in str(e):
+                pass
 
     def decode_token(self, token):
         """
