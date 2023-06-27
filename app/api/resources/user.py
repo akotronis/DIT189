@@ -6,8 +6,6 @@ from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import IntegrityError
 
 from ..database import DataBase
-from ..db import db
-from ..models import User
 from ..keycloak import KeycloakAPI
 from ..schemas import UserInputSchema, UserSchema
 
@@ -26,10 +24,15 @@ class UserList(MethodView):
     def get(self, query_args):
         """
         Accepts query params:
-            multiple key:value of type &role=SPOUSE&role=LAWYER etc
+            optional multiple key:value of type &role=SPOUSE&role=LAWYER etc
+            optional self=true/False to include self or not
         """
         # Can also fetch by request.args.to_dict(flat=False).get('role', [])
         # but it won't be deserialized/validated
         role = query_args.get('role', [])
         users = DataBase.get_users(role=role)
+        self_ = query_args.get('self', None)
+        if self_ == False:
+            email = kclk.token_info.get('email')
+            users = [user for user in users if not user.email == email]
         return users
