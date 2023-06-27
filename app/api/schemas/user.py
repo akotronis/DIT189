@@ -19,6 +19,5 @@ class UserInputSchema(Schema):
     """
     Validates inputs of the form ?role=LAWYER&role=SPOUCE single or multiple
     """
-    class Meta:
-        ordered = True
-    role = fields.List(fields.Enum(User.Types), required=False)
+    role = fields.List(fields.Enum(User.Types))
+    self = fields.Boolean()

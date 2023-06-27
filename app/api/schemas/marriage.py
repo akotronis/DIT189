@@ -13,5 +13,12 @@ class MarriageSchema(Schema):
 class MarriageUserDivorceSchema(MarriageSchema):
     class Meta:
         ordered = True
-    users = fields.List(fields.Nested('PlainUserSchema'))
-    divorces = fields.List(fields.Nested('DivorceSchema'))
+    users = fields.List(fields.Nested('UserSchema'))
+    divorces = fields.List(fields.Nested('DivorceNoMarriageSchema'))
+
+
+class MarriageInputSchema(Schema):
+    """
+    Validates input of the form ?in_use=True/False
+    """
+    in_use = fields.Boolean()
