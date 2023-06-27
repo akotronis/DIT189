@@ -57,7 +57,7 @@ class DataBase:
 
     @classmethod
     def make_marriages(cls):
-        spouses = list(User.query.filter(User.role==User.Types.SPOUSE))
+        spouses = User.query.filter(User.role==User.Types.SPOUSE).all()
         couples = [spouses[i:i + 2] for i in range(0, len(spouses), 2)]
         couples = [x for x in couples if len(x) == 2]
         for spouse_1, spouse_2 in couples:
@@ -78,15 +78,35 @@ class DataBase:
                 'username':f'person{num}',
                 'first_name':f'first_name{num}',
                 'last_name':f'first_name{num}',
-                'role':random.choice(list(User.Types.__members__.keys()))
+                'role':random.choice(User.Types.names)
             }
             cls.get_or_create_user(**user_data)
 
     @staticmethod
-    def get_active_marriages():
+    def get_marriages(in_use=None):
         '''Fetch active marriages for selection to start divorce process'''
-        # TODO: Specify Data Format
-        print([m.users for m in Marriage.query.filter_by(in_use=True).all()])
+        in_use = {'in_use': in_use} if in_use is not None else {}
+        return Marriage.query.filter_by(**in_use).all()
+    
+    @classmethod
+    def get_divorces(cls, many=True, **kwargs):
+        divorces = Divorce.query
+        if (status_list := kwargs.pop('status', [])):
+            # Make sure status_list is a list of enum types
+            status_list = [status_list] if isinstance(status_list, str) else status_list
+            if isinstance(next(iter(status_list), None), str):
+                status_list = Divorce.Status.filter_keys(status_list)
+            divorces = divorces.filter(Divorce.status.in_(status_list))
+        divorces = divorces.filter_by(**kwargs)
+        if many:
+            return divorces.all()
+        return divorces.first()
+    
+    @staticmethod
+    def update_marriages(filter_on_dict, values_dict):
+        values_dict = {getattr(Marriage, k, None): v for k,v in values_dict.items()}
+        Marriage.query.filter_by(**filter_on_dict).update(values_dict, synchronize_session=False)
+        db.session.commit()
 
     @staticmethod
     def start_divorce(marriage_id):
