@@ -17,7 +17,9 @@ class UserSchema(Schema):
 
 class UserInputSchema(Schema):
     """
-    Validates inputs of the form ?role=LAWYER&role=SPOUCE single or multiple
+    Validates inputs of the form
+    - ?role=LAWYER&role=SPOUCE single or multiple (optiona)
+    - ?self=True/False to include only divorces(cases) wher user is involved (optional)
     """
     role = fields.List(fields.Enum(User.Types))
     self = fields.Boolean()
