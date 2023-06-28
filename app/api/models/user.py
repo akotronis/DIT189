@@ -16,12 +16,18 @@ class User(db.Model):
         @classmethod
         @property
         def names(cls):
-            return cls.__members__.keys()
+            """
+            Return class attributes names as strings
+            """
+            return list(cls.__members__.keys())
         
         @classmethod
         @property
         def values(cls):
-            return cls.__members__.values()
+            """
+            Return class attributes as enum types
+            """
+            return list(cls.__members__.values())
         
         @classmethod
         def filter_keys(cls, names=None, output='types'):
