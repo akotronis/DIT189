@@ -25,6 +25,6 @@ class MarriageList(MethodView):
             optional in_use=True/False to select based on Marriage.in_use
         """
         
-        in_use = query_args.get('in_use')
-        marriages = DataBase.get_marriages(in_use=in_use).all()
+        in_use = query_args.get('in_use', {})
+        marriages = DataBase.get_marriages(**in_use).all()
         return marriages    
