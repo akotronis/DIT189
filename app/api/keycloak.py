@@ -164,7 +164,7 @@ class KeycloakAPI:
                 # If got here, token is successfully authenticated
                 username=self.token_info.get('preferred_username')
                 # Fetch user from api database
-                user = DataBase.get_users(many=False, username=username)
+                user = DataBase.get_users(username=username).first()
                 # If not found
                 if user is None:
                     # Delete user from keycloak
