@@ -1,3 +1,4 @@
+from datetime import datetime
 import random
 from datetime import datetime, timedelta
 from .db import db
@@ -27,8 +28,8 @@ class DataBase:
         """
         UsersMarriages.query.delete()
         UsersDivorces.query.delete()
-        Marriage.query.delete()
         Divorce.query.delete()
+        Marriage.query.delete()
         User.query.delete()
 
     @classmethod
@@ -41,7 +42,7 @@ class DataBase:
         return user
     
     @classmethod
-    def get_users(cls, many=True, **kwargs):
+    def get_users(cls, **kwargs):
         users = User.query
         if (role_list := kwargs.pop('role', [])):
             # Make sure role_list is a list of enum types
@@ -49,24 +50,8 @@ class DataBase:
             if isinstance(next(iter(role_list), None), str):
                 role_list = User.Types.filter_keys(role_list)
             users = users.filter(User.role.in_(role_list))
-        users = users.filter_by(**kwargs)
-        if many:
-            return users.all()
-        return users.first()
+        return users.filter_by(**kwargs)
     
-
-    @classmethod
-    def make_marriages(cls):
-        spouses = User.query.filter(User.role==User.Types.SPOUSE).all()
-        couples = [spouses[i:i + 2] for i in range(0, len(spouses), 2)]
-        couples = [x for x in couples if len(x) == 2]
-        for spouse_1, spouse_2 in couples:
-            marriage = Marriage(start_date=cls.random_date(), in_use=True)
-            spouse_1.marriages.append(marriage)
-            spouse_2.marriages.append(marriage)
-            db.session.add(marriage)
-        db.session.commit()
-
     @classmethod
     def make_users(cls):
         for i in range(1, 31):
@@ -81,15 +66,34 @@ class DataBase:
                 'role':random.choice(User.Types.names)
             }
             cls.get_or_create_user(**user_data)
+    
+    @staticmethod
+    def get_marriages(**kargs):
+        """
+        Fetch active marriages for selection to start divorce process
+        """
+        return Marriage.query.filter_by(**kargs)
+
+    @classmethod
+    def make_marriages(cls):
+        spouses = User.query.filter(User.role==User.Types.SPOUSE).all()
+        couples = [spouses[i:i + 2] for i in range(0, len(spouses), 2)]
+        couples = [x for x in couples if len(x) == 2]
+        for spouse_1, spouse_2 in couples:
+            marriage = Marriage(start_date=cls.random_date(), in_use=True)
+            spouse_1.marriages.append(marriage)
+            spouse_2.marriages.append(marriage)
+            db.session.add(marriage)
+        db.session.commit()
 
     @staticmethod
-    def get_marriages(in_use=None):
-        '''Fetch active marriages for selection to start divorce process'''
-        in_use = {'in_use': in_use} if in_use is not None else {}
-        return Marriage.query.filter_by(**in_use).all()
-    
+    def update_marriages(filter_on_dict, values_dict):
+        values_dict = {getattr(Marriage, k, None): v for k,v in values_dict.items()}
+        Marriage.query.filter_by(**filter_on_dict).update(values_dict, synchronize_session=False)
+        db.session.commit()
+
     @classmethod
-    def get_divorces(cls, many=True, **kwargs):
+    def get_divorces(cls, **kwargs):
         divorces = Divorce.query
         if (status_list := kwargs.pop('status', [])):
             # Make sure status_list is a list of enum types
@@ -97,20 +101,31 @@ class DataBase:
             if isinstance(next(iter(status_list), None), str):
                 status_list = Divorce.Status.filter_keys(status_list)
             divorces = divorces.filter(Divorce.status.in_(status_list))
-        divorces = divorces.filter_by(**kwargs)
-        if many:
-            return divorces.all()
-        return divorces.first()
+        return divorces.filter_by(**kwargs)
     
     @staticmethod
-    def update_marriages(filter_on_dict, values_dict):
-        values_dict = {getattr(Marriage, k, None): v for k,v in values_dict.items()}
-        Marriage.query.filter_by(**filter_on_dict).update(values_dict, synchronize_session=False)
+    def start_divorce(marriage, lawyer_email):
+        # Divorce data
+        data = {
+            'marriage_id': marriage.id,
+            'status':Divorce.Status.WAIT_LAWYER_2,
+            'start_date': datetime.now().date()
+        }
+        divorce = Divorce(**data)
+        db.session.add(divorce)
         db.session.commit()
 
-    @staticmethod
-    def start_divorce(marriage_id):
-        ...
+        # Lawyer data
+        lawyer = DataBase.get_users(email=lawyer_email).first()
+        # Add lawyer to users_divorces
+        lawyer_divorce = UsersDivorces(user_id=lawyer.id, divorce_id=divorce.id, user_role='INITIAL_LAWYER', confirmed=True)
+        db.session.add(lawyer_divorce)
+        # Add spouces to users_divorces
+        for spouce in marriage.users:
+            spouce_divorce = UsersDivorces(user_id=spouce.id, divorce_id=divorce.id, user_role='SPOUSE', confirmed=False)
+            db.session.add(spouce_divorce)
+        db.session.commit()
+        return divorce
 
     @classmethod
     def initialize(cls):
