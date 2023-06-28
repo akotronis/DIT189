@@ -9,7 +9,8 @@ from ..db import db
 class Divorce(db.Model):
 
     class Status(enum.Enum):
-        STARTED = 1 # Is it needed? It is the same with 2
+        # Is it needed? It is the same with 2
+        STARTED = 1
         WAIT_LAWYER_2 = 2
         WAIT_SPOUSES = 3
         WAIT_10DAY = 4
@@ -20,12 +21,18 @@ class Divorce(db.Model):
         @classmethod
         @property
         def names(cls):
-            return cls.__members__.keys()
+            """
+            Return class attributes names as strings
+            """
+            return list(cls.__members__.keys())
         
         @classmethod
         @property
         def values(cls):
-            return cls.__members__.values()
+            """
+            Return class attributes as enum types
+            """
+            return list(cls.__members__.values())
         
         @classmethod
         def filter_keys(cls, names=None, output='types'):
@@ -61,4 +68,4 @@ class Divorce(db.Model):
     users = db.relationship('User', back_populates='divorces', secondary='users_divorces')
 
     def __repr__(self):
-        return f'<User "{self.email}">'
+        return f'<User "{self.id}">'
