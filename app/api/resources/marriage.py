@@ -26,9 +26,5 @@ class MarriageList(MethodView):
         """
         
         in_use = query_args.get('in_use')
-        marriages = DataBase.get_marriages(in_use=in_use)
-        # self_ = query_args.get('self', None)
-        # if self_ == False:
-        #     email = kclk.token_info.get('email')
-        #     users = [user for user in users if not user.email == email]
+        marriages = DataBase.get_marriages(in_use=in_use).all()
         return marriages    

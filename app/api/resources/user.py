@@ -25,7 +25,7 @@ class UserList(MethodView):
         """
         Accepts query params:
             optional multiple key:value of type &role=SPOUSE&role=LAWYER etc
-            optional self=true/False to include self or not
+            optional self=True/False to include self or not
         """
         # Can also fetch by request.args.to_dict(flat=False).get('role', [])
         # but it won't be deserialized/validated
