@@ -42,7 +42,7 @@ class KeycloakAPI:
         self.change_realm(self.realm)
 
         # This will store daat from the decoded token, if decoding is successful
-        self.token_info = None
+        self.token_info = {}
 
     def get_token_from_credentials(self, username, password, key=None):
         try:
@@ -70,7 +70,7 @@ class KeycloakAPI:
             'verify_exp':True,
             'verify_signature':True
         }
-        self.token_info = self.openid.decode_token(token, key=self.public_key, options=options)
+        self.token_info = self.openid.decode_token(token, key=self.public_key, options=options) or {}
         return self.token_info
 
     def change_realm(self, new_realm):
