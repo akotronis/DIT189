@@ -2,6 +2,7 @@ from marshmallow import Schema, fields
 
 from ..models import Divorce
 
+
 class DivorceNoMarriageSchema(Schema):
     class Meta:
         ordered = True
@@ -17,6 +18,8 @@ class DivorceSchema(DivorceNoMarriageSchema):
     class Meta:
         ordered = True
     marriage = fields.Nested('MarriageSchema')
+    users = fields.List(fields.Nested('UserSchema'))
+    user_confirmations = fields.List(fields.Nested('UserConfirmationsSchema'))
 
 
 class DivorceInputSchema(Schema):
@@ -27,9 +30,24 @@ class DivorceInputSchema(Schema):
     """
     status = fields.List(fields.Enum(Divorce.Status))
     self = fields.Boolean(load_default=True)
+
+
+class DivorceInputUpdateSchema(Schema):
+    """
+    Validates inputs of the form
+    - ?confirm=True/False to declare approval or not from the request user
+    """
+    confirm = fields.Boolean(required=True)
     
     
 class DivorceCreateSchema(Schema):
     class Meta:
         ordered = True
     marriage_id = fields.UUID()
+
+
+class DivorceUpdateSchema(Schema):
+    class Meta:
+        ordered = True
+    end_date = fields.DateTime('%Y-%m-%d')
+    aggrement_text = fields.Str()
