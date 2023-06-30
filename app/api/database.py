@@ -62,7 +62,7 @@ class DataBase:
                 'email':f'person{num}@gmail.com',
                 'username':f'person{num}',
                 'first_name':f'first_name{num}',
-                'last_name':f'first_name{num}',
+                'last_name':f'last_name{num}',
                 'role':random.choice(User.Types.names)
             }
             cls.get_or_create_user(**user_data)
@@ -126,14 +126,79 @@ class DataBase:
             db.session.add(spouce_divorce)
         db.session.commit()
         return divorce
+    
+    @staticmethod
+    def update_divorce(**kwargs):
+        divorce_id = kwargs.pop('id', None)
+        
+        confirm = kwargs.pop('confirm', None)
+        values_dict = {getattr(Divorce, k, None): v for k,v in kwargs.items() if v}
+        Divorce.query.filter_by(id=divorce_id).update(values_dict, synchronize_session=False)
+
+        # Incomplete Logic Here
+
+        # Update Divorce and related table values
+        status = kwargs.get('status')
+        if confirm:
+            ...
+        elif confirm == False:
+            ...
+
+
+        db.session.commit()
+        divorce = Divorce.query.get_or_404(divorce_id)
+        return divorce
+    
+    @classmethod
+    def time_elapsed_from_divorce_creation(cls, divorce):
+        """
+        Return the difference in days between the divorce start day and now
+        """
+        return (datetime.now().date() - divorce.start_date).days
+    
+    @classmethod
+    def divorce_status_from_confirmations(cls, divorce, user):
+        """
+        Input:
+            - The existing divorce that is being updated
+            - The user confirming the divorce
+        Output: The update divorce status
+        """
+        new_status = None
+        user_role = user.role.name
+        
+        if user_role == User.Types.NOTARY.name:
+            return Divorce.Status.COMPLETED
+        
+        user_confirmations = divorce.user_confirmations.filter_by(confirmed=True).all()
+        roles_confirmed = [row.user_role.name for row in user_confirmations]
+        
+        # Incomplete Logic Here
+
+        if all([
+            'INITIAL_LAWYER' in roles_confirmed,
+            'SECONDARY_LAWYER' not in roles_confirmed
+        ]):
+            new_status = ...
+        return new_status
+
+    @classmethod
+    def table_exists(cls, model):
+        table_names = [table.name for table in db.get_tables_for_bind()]
+        return model.__tablename__ in table_names
+    
+    @classmethod
+    def table_is_empty(cls, model):
+        return DataBase.table_exists(model) and not model.query.first() 
 
     @classmethod
     def initialize(cls):
-        # Clear tables contents
-        cls.clean_tables()
+        # # Clear tables contents
+        # cls.clean_tables()
 
-        # Create users
-        cls.make_users()
+        if DataBase.table_is_empty(User):
+            # Create users
+            cls.make_users()
 
-        # Create marriages
-        cls.make_marriages()
+            # Create marriages
+            cls.make_marriages()
