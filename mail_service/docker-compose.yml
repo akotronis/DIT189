@@ -1,0 +1,25 @@
+version: '3'
+services:
+  mailhog:
+    build:
+      context: .
+      dockerfile: MailHog.dockerfile
+    ports:
+      - 8025:8025  # MailHog web interface
+      - 1025:1025  # MailHog SMTP server
+    networks:
+      - mynetwork
+
+  flask-app:
+    build:
+      context: .
+      dockerfile: Notifications.dockerfile
+    ports:
+      - 5000:5000  # Notifications app port
+    depends_on:
+      - mailhog
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
