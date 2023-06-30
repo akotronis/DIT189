@@ -66,6 +66,7 @@ class Divorce(db.Model):
     aggrement_text = db.Column(db.String, nullable=True)
     marriage = db.relationship('Marriage', back_populates='divorces')
     users = db.relationship('User', back_populates='divorces', secondary='users_divorces')
+    user_confirmations = db.relationship('UsersDivorces', viewonly=True, lazy='dynamic')
 
     def __repr__(self):
-        return f'<User "{self.id}">'
+        return f'<Divorce "{self.id}">'

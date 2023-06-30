@@ -56,3 +56,4 @@ class UsersDivorces(db.Model):
     divorce_id = db.Column(UUID(as_uuid=True), db.ForeignKey('divorces.id'), primary_key=True)
     user_role = db.Column(Enum(UserRole))
     confirmed = db.Column(db.Boolean)
+    divorce = db.relationship('Divorce', viewonly=True)
