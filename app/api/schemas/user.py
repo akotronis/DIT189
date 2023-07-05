@@ -18,8 +18,25 @@ class UserSchema(Schema):
 class UserInputSchema(Schema):
     """
     Validates inputs of the form
-    - ?role=LAWYER&role=SPOUCE single or multiple (optiona)
-    - ?self=True/False to include only divorces(cases) wher user is involved (optional)
+    - ?role=LAWYER&role=SPOUSE multiple to filter based on user roles
+    - ?self=True/False to include self or not
     """
-    role = fields.List(fields.Enum(User.Types))
-    self = fields.Boolean()
+    role = fields.List(fields.Enum(User.Types), required=True)
+    self = fields.Boolean(required=True)
+
+
+class KeycloakUserInputSchema(Schema):
+    """
+    Validates inputs of the form
+    - ?role=LAWYER&role=SPOUSE etc single
+    """
+    role = fields.Enum(User.Types, required=True)
+
+
+class KeycloakUserOutputSchema(Schema):
+    """
+    Output of user created in Keycloak
+    """
+    email = fields.Email()
+    # role = fields.Enum(User.Types)
+    token = fields.Str()

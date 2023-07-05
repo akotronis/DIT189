@@ -25,11 +25,11 @@ class DivorceSchema(DivorceNoMarriageSchema):
 class DivorceInputSchema(Schema):
     """
     Validates inputs of the form
-    - ?status=COMPLETED&role=CANCELLED single or multiple (optional)
+    - ?status=COMPLETED&status=CANCELLED single or multiple (optional)
     - ?self=True/False to include only divorces(cases) wher user is involved (optional)
     """
-    status = fields.List(fields.Enum(Divorce.Status))
-    self = fields.Boolean(load_default=True)
+    status = fields.List(fields.Enum(Divorce.Status), required=True)
+    self = fields.Boolean(required=True)
 
 
 class DivorceInputUpdateSchema(Schema):
@@ -44,10 +44,11 @@ class DivorceCreateSchema(Schema):
     class Meta:
         ordered = True
     marriage_id = fields.UUID()
+    notary_id = fields.UUID()
+    other_lawyer_id = fields.UUID()
 
 
 class DivorceUpdateSchema(Schema):
     class Meta:
         ordered = True
-    end_date = fields.DateTime('%Y-%m-%d')
     aggrement_text = fields.Str()
