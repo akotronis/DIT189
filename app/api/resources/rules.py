@@ -2,9 +2,9 @@ from flask import current_app as app
 from flask_smorest import Blueprint
 
 
-blp_rules = Blueprint("Rules", __name__)
+blp = Blueprint("Rules", __name__)
 
-@blp_rules.route('/rules')
+@blp.route('/rules')
 def root():
     """
     Returns all api endpoints
