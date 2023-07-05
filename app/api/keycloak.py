@@ -72,12 +72,34 @@ class KeycloakAPI:
         }
         self.token_info = self.openid.decode_token(token, key=self.public_key, options=options) or {}
         return self.token_info
+    
+    def get_and_decode_token(self):
+        auth_header = request.headers.get('Authorization', '')
+        error_data = {
+            'http_status_code': 401,
+            'message': 'HTTP 401 Unauthenticated',
+            'headers': {'WWW-Authenticate': 'Bearer'}
+        }
+        auth = auth_header.split()
+        if len(auth) != 2 or not next(iter(auth), None) == 'Bearer':
+            error_data['message'] = 'Invalid token header. Check token header format.'
+            abort(**error_data)
+        try:
+            token = auth[1]
+            self.decode_token(token)
+        except Exception as e:
+            error_data['message'] = str(e)
+            abort(**error_data)
+        return self.token_info
 
     def change_realm(self, new_realm):
         self.conn.realm_name = new_realm
 
     def get_user_by_id(self, user_id):
         return self.admin.get_user(user_id)
+    
+    def get_users(self):
+        return self.admin.get_users({})
     
     def get_user_by_username(self, username):
         user_id = self.admin.get_user_id(username)
@@ -145,22 +167,7 @@ class KeycloakAPI:
             # like __name__, __doc__
             @wraps(func_to_decorate)
             def decorated_func(*args, **kwargs):
-                auth_header = request.headers.get('Authorization', '')
-                error_data = {
-                    'http_status_code': 401,
-                    'message': 'HTTP 401 Unauthenticated',
-                    'headers': {'WWW-Authenticate': 'Bearer'}
-                }
-                auth = auth_header.split()
-                if len(auth) != 2 or not next(iter(auth), None) == 'Bearer':
-                    error_data['message'] = 'Invalid token header. Check token header format.'
-                    abort(**error_data)
-                try:
-                    token = auth[1]
-                    self.decode_token(token)
-                except Exception as e:
-                    error_data['message'] = str(e)
-                    abort(**error_data)
+                self.get_and_decode_token()
                 # If got here, token is successfully authenticated
                 username=self.token_info.get('preferred_username')
                 # Fetch user from api database
