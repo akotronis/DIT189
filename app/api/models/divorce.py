@@ -9,11 +9,10 @@ from ..db import db
 class Divorce(db.Model):
 
     class Status(enum.Enum):
-        # Is it needed? It is the same with 2
-        STARTED = 1
-        WAIT_LAWYER_2 = 2
-        WAIT_SPOUSES = 3
-        WAIT_10DAY = 4
+        WAIT_LAWYER_2 = 1
+        WAIT_SPOUSE_1 = 2
+        WAIT_SPOUSE_2 = 3
+        WAIT_10DAYS = 4
         WAIT_NOTARY = 5
         COMPLETED = 6
         CANCELLED = 7
@@ -62,6 +61,7 @@ class Divorce(db.Model):
     status = db.Column(Enum(Status), nullable=True)
     cancelled_by_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'))
     start_date = db.Column(db.Date, nullable=True)
+    start_10day_date = db.Column(db.Date, nullable=True)
     end_date = db.Column(db.Date, nullable=True)
     aggrement_text = db.Column(db.String, nullable=True)
     marriage = db.relationship('Marriage', back_populates='divorces')
