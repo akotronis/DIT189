@@ -13,7 +13,6 @@ kclk = KeycloakAPI()
 
 @blp.route('/users')
 class UserList(MethodView):
-    # Leave it WITHOUT token to get users from swagger and see emails/usernames/roles
     @kclk.token_required('lawyer')
     @blp.arguments(UserInputSchema, location='query')
     @blp.response(200, UserSchema(many=True))
