@@ -18,7 +18,7 @@ class UserList(MethodView):
     @blp.response(200, UserSchema(many=True))
     def get(self, query_args):
         """
-        Get all users (No authentication token required)
+        Get all users (Requires authentication token and role lawyer)
 
         Accepts query params:
         - Multiple of type `&role=SPOUSE&role=LAWYER` etc to filter based on user roles
