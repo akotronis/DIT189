@@ -175,7 +175,10 @@ class KeycloakAPI:
                 # If not found
                 if user is None:
                     # Delete user from keycloak
-                    self.delete_user(username)
+                    try:
+                        self.delete_user(username)
+                    except:
+                        pass
                     abort(**{'http_status_code': 404, 'message': 'User not found'})
                 # User is found in api database.
                 # Verify authorization if endpont is authorized based on role
