@@ -36,13 +36,13 @@ class DataBase:
     def drop_tables():
         db.drop_all()
 
-    @staticmethod
-    def drop_table(model):
-        if DataBase.table_exists(model):
+    @classmethod
+    def drop_table(cls, model):
+        if cls.table_exists(model):
             model.__table__.drop()
 
-    @classmethod
-    def table_exists(cls, model):
+    @staticmethod
+    def table_exists(model):
         """
         Determine if the table of a model exists
         """
@@ -54,7 +54,7 @@ class DataBase:
         """
         Determine if the table of a model exists and is empty
         """
-        return DataBase.table_exists(model) and not model.query.first() 
+        return cls.table_exists(model) and not model.query.first() 
 
     @classmethod
     def initialize(cls, fresh=False, drop=False):
@@ -64,22 +64,22 @@ class DataBase:
         """
         if drop:
             fresh = False
-            DataBase.drop_tables()
-            DataBase.create_tables()
+            cls.drop_tables()
+            cls.create_tables()
 
         # Clear tables contents
         if fresh:
             cls.clean_tables()
 
-        if DataBase.table_is_empty(User):
+        if cls.table_is_empty(User):
             # Create users
             cls.make_users()
 
             # Create marriages
             cls.make_marriages()
 
-    @classmethod
-    def get_or_create_user(cls, **kwargs):
+    @staticmethod
+    def get_or_create_user(**kwargs):
         user = User.query.filter_by(**kwargs).first()
         if not user:
             user = User(**kwargs)
@@ -87,8 +87,8 @@ class DataBase:
             db.session.commit()
         return user
     
-    @classmethod
-    def get_users(cls, **kwargs):
+    @staticmethod
+    def get_users(**kwargs):
         users = User.query
         if (role_list := kwargs.pop('role', [])):
             # Make sure role_list is a list of enum types
@@ -148,8 +148,8 @@ class DataBase:
         Marriage.query.filter_by(**filter_on_dict).update(values_dict, synchronize_session=False)
         db.session.commit()
 
-    @classmethod
-    def get_divorces(cls, **kwargs):
+    @staticmethod
+    def get_divorces(**kwargs):
         """
         Get divorces according to kwargs filter dict
         """
@@ -162,59 +162,64 @@ class DataBase:
             divorces = divorces.filter(Divorce.status.in_(status_list))
         return divorces.filter_by(**kwargs)
     
-    @classmethod
-    def add_users_divorces(cls, **kwargs):
+    @staticmethod
+    def add_users_divorces(**kwargs):
         db.session.add(UsersDivorces(**kwargs))
         db.session.commit()
-    
+
     @staticmethod
-    def start_divorce(marriage, lawyer_email, other_lawyer, notary):
+    def update_users_divorces(filter_on_dict, values_dict):
+        UsersDivorces.query.filter_by(**filter_on_dict).update(values_dict, synchronize_session=False)
+        db.session.commit()
+    
+    @classmethod
+    def start_divorce(cls, marriage, lawyer_email, other_lawyer, notary, aggrement_text):
         # Divorce data
         data = {
             'marriage_id': marriage.id,
-            'status':Divorce.Status.WAIT_LAWYER_2,
-            'start_date': datetime.now().date()
+            'status': Divorce.Status.WAIT_LAWYER_2,
+            'start_date': datetime.now().date(),
+            'aggrement_text': aggrement_text
         }
         divorce = Divorce(**data)
         db.session.add(divorce)
         db.session.commit()
 
         # Lawyer data
-        lawyer = DataBase.get_users(email=lawyer_email).first()
+        lawyer = cls.get_users(email=lawyer_email).first()
         # Add lawyer to users_divorces
         
-        DataBase.add_users_divorces(
+        cls.add_users_divorces(
             user_id=lawyer.id, divorce_id=divorce.id, user_role=UsersDivorces.UserRole.INITIAL_LAWYER.name, confirmed=True
         )
         # Add other lawyer to users_divorces
-        DataBase.add_users_divorces(
+        cls.add_users_divorces(
             user_id=other_lawyer.id, divorce_id=divorce.id, user_role=UsersDivorces.UserRole.SECONDARY_LAWYER.name, confirmed=False
         )
         # Add notary to users_divorces
-        DataBase.add_users_divorces(
+        cls.add_users_divorces(
             user_id=notary.id, divorce_id=divorce.id, user_role=UsersDivorces.UserRole.NOTARY.name, confirmed=False
         )
         # Add spouses to users_divorces
         for spouse in marriage.users:
-            DataBase.add_users_divorces(
+            cls.add_users_divorces(
                 user_id=spouse.id, divorce_id=divorce.id, user_role=UsersDivorces.UserRole.SPOUSE.name, confirmed=False
             )
         return divorce
     
-    @staticmethod
-    def update_divorce(**kwargs):
+    @classmethod
+    def update_divorce(cls, **kwargs):
         divorce_id = kwargs.pop('id', None)
-        
-        confirm = kwargs.pop('confirm', None)
         values_dict = {getattr(Divorce, k, None): v for k,v in kwargs.items() if v}
+        print(values_dict)
         Divorce.query.filter_by(id=divorce_id).update(values_dict, synchronize_session=False)
 
         db.session.commit()
-        divorce = DataBase.get_divorces(id=divorce_id)
+        divorce = cls.get_divorces(id=divorce_id).first()
         return divorce
     
-    @classmethod
-    def time_elapsed_from_10day_start(cls, divorce):
+    @staticmethod
+    def time_elapsed_from_10day_start(divorce):
         """
         Return the difference in days between the divorce start day and now
         """
@@ -222,8 +227,8 @@ class DataBase:
             return 0
         return (datetime.now().date() - divorce.start_10day_date).days
     
-    @classmethod
-    def confirmed_divorce_new_status(cls, divorce, user):
+    @staticmethod
+    def confirmed_divorce_new_status(divorce, user):
         """
         Input:
             - The existing divorce that is being updated
@@ -247,8 +252,8 @@ class DataBase:
             else:
                 return Divorce.Status.WAIT_10DAYS
 
-    @classmethod
-    def user_can_confirm(cls, divorce, user):
+    @staticmethod
+    def user_can_confirm(divorce, user):
         """
         Given a divorce and a loggedin user, determine
         if the user can confirm the divorce based on it's role 
@@ -278,7 +283,7 @@ class DataBase:
         if the user can cancel the divorce based on it's role 
         and the divorce status
         """
-        if DataBase.time_elapsed_from_10day_start(divorce) > 10:
+        if cls.time_elapsed_from_10day_start(divorce) > 10:
             divorce.status = Divorce.Status.WAIT_NOTARY
             db.session.commit()
         divorce_status = divorce.status.name

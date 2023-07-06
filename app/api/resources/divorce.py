@@ -5,7 +5,7 @@ from flask_smorest import Blueprint, abort
 from ..database import DataBase
 from ..models import Divorce, User, UsersDivorces
 from ..keycloak import KeycloakAPI
-from ..schemas import DivorceCreateSchema, DivorceInputSchema, DivorceInputUpdateSchema, DivorceSchema, DivorceUpdateSchema
+from ..schemas import DivorceCreateSchema, DivorceInputSchema, DivorceInputUpdateSchema, DivorceSchema
 
 
 blp = Blueprint('Case', __name__)
@@ -41,7 +41,8 @@ class DivorceList(MethodView):
         """
         Create a case (divorce) (Requires authentication token of role lawyer)
 
-        Accepts json with the ids of **marriage**, **notary** and **other lawyer** ids
+        Accepts json with the ids of **marriage**, **notary** and **other lawyer** ids and
+        the **aggrement text**
         """
 
         # Get lawyer email
@@ -83,7 +84,8 @@ class DivorceList(MethodView):
         DataBase.update_marriages(marriage_dict, {'in_use': False})
         
         # Start divorce
-        divorce = DataBase.start_divorce(marriage, lawyer_email, other_lawyer, notary)
+        aggrement_text = divorce_data.get('aggrement_text')
+        divorce = DataBase.start_divorce(marriage, lawyer_email, other_lawyer, notary, aggrement_text)
         return divorce, 201
     
 
@@ -101,9 +103,8 @@ class DivorceDetail(MethodView):
     
     @kclk.token_required()
     @blp.arguments(DivorceInputUpdateSchema, location='query')
-    @blp.arguments(DivorceUpdateSchema)
-    @blp.response(201, DivorceSchema)
-    def put(self, query_args, divorce_data, case_id):
+    @blp.response(200, DivorceSchema)
+    def put(self, query_args, case_id):
         """
         Update a case (divorce) (Requires authentication token)
 
@@ -111,6 +112,7 @@ class DivorceDetail(MethodView):
         - `?confirm=True/False` to declare confirmation or cancelling from the loggedin user
     
         """
+        divorce_data = {}
         divorce_id = case_id
         # Fetch divorce and if already cancelled/completed, abort
         existing_divorce = Divorce.query.get_or_404(divorce_id)
@@ -119,7 +121,7 @@ class DivorceDetail(MethodView):
             abort(400, message="This Divorce is already cancelled")
         if existing_divorce_status == Divorce.Status.COMPLETED.name:
             abort(400, message="This Divorce is already completed")
-
+        
         # Boolean value: confirmation/rejection from logged in user
         confirm = query_args.get('confirm')
 
@@ -134,18 +136,18 @@ class DivorceDetail(MethodView):
         if not confirm:
             # If can't cancel abort
             if not DataBase.user_can_cancel(existing_divorce, user):
-                abort(400, "Cannot cancel divorce. Over 10 days since start.")
+                abort(403, message="Cannot cancel divorce. Over 10 days since start.")
             new_status = Divorce.Status.CANCELLED
         # User wants to confirm
         else:
             # If can't confirm abort
             if not DataBase.user_can_confirm(existing_divorce, user):
-                abort(400, "Cannot confirm divorce.")
+                abort(403, message="Cannot confirm divorce.")
             new_status = DataBase.confirmed_divorce_new_status(existing_divorce, user)
 
         # If status is None, abort
         if not new_status:
-            abort(400, message="Can't confirm divorce. Wait for other roles first or case closed")
+            abort(403, message="Can't confirm divorce. Wait for other roles first or case closed")
         
         # If new status is WAIT_10DAYS, update divorce_data with start_10day_date
         if new_status.name == Divorce.Status.WAIT_10DAYS.name:
@@ -159,16 +161,9 @@ class DivorceDetail(MethodView):
 
         # Update data with query param and id from url
         divorce_data['id'] = divorce_id
-        divorce_data['confirm'] = confirm
-        divorce_data['cancelled_by'] = cancelled_by
+        divorce_data['cancelled_by_id'] = cancelled_by
         divorce_data['status'] = new_status
         
-        # Check valid combinations of new status values and other incoming data
-        agreement_text = divorce_data.get('agreement_text')
-        status_completed = new_status.name == Divorce.Status.COMPLETED.name
-        if status_completed and not agreement_text:
-            abort(400, message="Completed status with missing agreement_text")
-
         # Update and return divorce
         updated_divorce = DataBase.update_divorce(**divorce_data)
         
@@ -178,11 +173,14 @@ class DivorceDetail(MethodView):
             divorce_user_role = user_role
             if divorce_user_role == User.Types.LAWYER.name:
                 divorce_user_role = UsersDivorces.UserRole.SECONDARY_LAWYER.name
-            DataBase.add_users_divorces(user_id=user_id, divorce_id=existing_divorce.id, user_role=divorce_user_role, confirmed=True)
+            filter_on_dict = {'user_id': user_id, 'divorce_id': existing_divorce.id}
+            values_dict = {'user_role': divorce_user_role, 'confirmed': True}
+            DataBase.update_users_divorces(filter_on_dict, values_dict)
         
         # Update marriage
         marriage = existing_divorce.marriage
         marriage_id_dict = {'id':marriage.id}
+        status_completed = new_status.name == Divorce.Status.COMPLETED.name
         if status_completed:
             DataBase.update_marriages(marriage_id_dict, {'end_date':datetime.now().date()})
         if status_cancelled:

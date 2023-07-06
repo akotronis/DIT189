@@ -8,7 +8,7 @@ class DivorceNoMarriageSchema(Schema):
         ordered = True
     id = fields.UUID()
     status = fields.Enum(Divorce.Status)
-    cancelled_by = fields.Nested('UserSchema', allow_null=True, default={})
+    cancelled_by_id = fields.Nested('UserSchema', allow_null=True, default={})
     start_date = fields.DateTime('%Y-%m-%d')
     end_date = fields.DateTime('%Y-%m-%d')
     aggrement_text = fields.Str()
@@ -43,12 +43,7 @@ class DivorceInputUpdateSchema(Schema):
 class DivorceCreateSchema(Schema):
     class Meta:
         ordered = True
-    marriage_id = fields.UUID()
-    notary_id = fields.UUID()
-    other_lawyer_id = fields.UUID()
-
-
-class DivorceUpdateSchema(Schema):
-    class Meta:
-        ordered = True
-    aggrement_text = fields.Str()
+    marriage_id = fields.UUID(required=True)
+    notary_id = fields.UUID(required=True)
+    other_lawyer_id = fields.UUID(required=True)
+    aggrement_text = fields.Str(required=True)
