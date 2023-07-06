@@ -28,7 +28,7 @@ class DivorceInputSchema(Schema):
     - ?status=COMPLETED&status=CANCELLED single or multiple (optional)
     - ?self=True/False to include only divorces(cases) wher user is involved (optional)
     """
-    status = fields.List(fields.Enum(Divorce.Status), required=True)
+    status = fields.List(fields.Enum(Divorce.Status))
     self = fields.Boolean(required=True)
 
 

@@ -163,7 +163,7 @@ class DataBase:
         return divorces.filter_by(**kwargs)
     
     @classmethod
-    def add_users_divorces(**kwargs):
+    def add_users_divorces(cls, **kwargs):
         db.session.add(UsersDivorces(**kwargs))
         db.session.commit()
     

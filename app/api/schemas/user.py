@@ -21,7 +21,7 @@ class UserInputSchema(Schema):
     - ?role=LAWYER&role=SPOUSE multiple to filter based on user roles
     - ?self=True/False to include self or not
     """
-    role = fields.List(fields.Enum(User.Types), required=True)
+    role = fields.List(fields.Enum(User.Types))
     self = fields.Boolean(required=True)
 
 

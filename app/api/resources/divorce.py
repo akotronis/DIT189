@@ -89,6 +89,16 @@ class DivorceList(MethodView):
 
 @blp.route('/cases/<uuid:case_id>')
 class DivorceDetail(MethodView):
+    # @kclk.token_required()
+    @blp.response(200, DivorceSchema)
+    def get(self, case_id):
+        """
+        Get a case (divorce) (Requires authentication token)
+        """
+        divorce_id = case_id
+        divorce = Divorce.query.get_or_404(divorce_id)
+        return divorce
+    
     @kclk.token_required()
     @blp.arguments(DivorceInputUpdateSchema, location='query')
     @blp.arguments(DivorceUpdateSchema)
