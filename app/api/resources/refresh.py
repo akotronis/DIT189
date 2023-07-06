@@ -3,7 +3,7 @@ from flask_smorest import Blueprint
 from flask.views import MethodView
 
 from ..database import DataBase
-from ..schemas import RefreshInputSchema
+from ..schemas import RefreshInputSchema, UserSchema
 
 
 blp = Blueprint("Refresh", __name__)
@@ -11,6 +11,7 @@ blp = Blueprint("Refresh", __name__)
 @blp.route('/refresh')
 class Refresh(MethodView):
     @blp.arguments(RefreshInputSchema, location='query')
+    @blp.response(200, UserSchema(many=True))
     def get(self, query_args):
         """
         Refresh Database. (No authentication token required)
@@ -20,4 +21,5 @@ class Refresh(MethodView):
         """
         drop = query_args.get('drop')
         DataBase.initialize(fresh=True, drop=drop)
-        return jsonify(message='Database Reinitialized'), 200
+        return DataBase.get_users()
+        # return jsonify(message='Database Reinitialized'), 200
