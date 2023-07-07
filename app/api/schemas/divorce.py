@@ -27,9 +27,11 @@ class DivorceInputSchema(Schema):
     Validates inputs of the form
     - ?status=COMPLETED&status=CANCELLED single or multiple (optional)
     - ?self=True/False to include only divorces(cases) wher user is involved (optional)
+    - ?contains to filter objects containing substring in field values
     """
     status = fields.List(fields.Enum(Divorce.Status))
     self = fields.Boolean(required=True)
+    contains = fields.Str()
 
 
 class DivorceInputUpdateSchema(Schema):

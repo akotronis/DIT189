@@ -23,11 +23,13 @@ class UserList(MethodView):
         Accepts query params:
         - Multiple of type `&role=SPOUSE&role=LAWYER` etc to filter based on user roles
         - `self=True/False` to include self or not
+        - `?contains` to filter objects containing substring in *email, username, first_name, last_name, vat_num, role*
         """
         # Can also fetch by request.args.to_dict(flat=False).get('role', [])
         # but it won't be deserialized/validated
         role = query_args.get('role', [])
-        users = DataBase.get_users(role=role)
+        contains = query_args.get('contains')
+        users = DataBase.get_users(role=role, contains=contains)
         self_ = query_args.get('self', None)
         if self_ == False:
             email = kclk.token_info.get('email')

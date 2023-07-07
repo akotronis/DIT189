@@ -20,9 +20,11 @@ class UserInputSchema(Schema):
     Validates inputs of the form
     - ?role=LAWYER&role=SPOUSE multiple to filter based on user roles
     - ?self=True/False to include self or not
+    - ?contains to filter objects containing substring in field values
     """
     role = fields.List(fields.Enum(User.Types))
     self = fields.Boolean(required=True)
+    contains = fields.Str()
 
 
 class KeycloakUserInputSchema(Schema):

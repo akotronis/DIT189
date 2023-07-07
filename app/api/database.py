@@ -1,8 +1,10 @@
-from datetime import datetime
-import random
 from datetime import datetime, timedelta
-from .db import db
+import random
 
+from sqlalchemy import cast, func, String
+from sqlalchemy.sql import or_
+
+from .db import db
 from .models import *
 
 
@@ -96,6 +98,18 @@ class DataBase:
             if isinstance(next(iter(role_list), None), str):
                 role_list = User.Types.filter_keys(role_list)
             users = users.filter(User.role.in_(role_list))
+        contains = kwargs.pop('contains', None)
+        if contains:
+            contains = contains.lower()
+            conditions = [
+                User.email.contains(contains),
+                User.username.contains(contains),
+                User.first_name.contains(contains),
+                User.last_name.contains(contains),
+                cast(User.vat_num, String).contains(contains),
+                func.lower(cast(User.role, String)).contains(contains)
+            ]
+            users = users.filter(or_(*conditions))
         return users.filter_by(**kwargs)
     
     @classmethod
@@ -160,6 +174,14 @@ class DataBase:
             if isinstance(next(iter(status_list), None), str):
                 status_list = Divorce.Status.filter_keys(status_list)
             divorces = divorces.filter(Divorce.status.in_(status_list))
+        contains = kwargs.pop('contains', None)
+        if contains:
+            contains = contains.lower()
+            conditions = [
+                func.lower(cast(Divorce.status, String)).contains(contains),
+                func.lower(cast(Divorce.aggrement_text, String)).contains(contains)
+            ]
+            divorces = divorces.filter(or_(*conditions))
         return divorces.filter_by(**kwargs)
     
     @staticmethod

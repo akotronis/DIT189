@@ -22,12 +22,14 @@ class DivorceList(MethodView):
         Get all cases (divorces) (Requires authentication token)
 
         Accepts query params:
-        - Multiple of type `&status=COMPLETED&status=CANCELLED` etc (Optional)<br>
+        - Multiple of type `&status=COMPLETED&status=CANCELLED` etc (Optional)
         - `self=True/False` to return only divorces (cases) wher user is involved
+        - `?contains` to filter objects containing substring in *status, aggrement_text*
         """
         
         status = query_args.get('status', [])
-        divorces = DataBase.get_divorces(status=status).all()
+        contains = query_args.get('contains')
+        divorces = DataBase.get_divorces(status=status, contains=contains).all()
         self_ = query_args.get('self', None)
         if self_ == True:
             email = kclk.token_info.get('email')
