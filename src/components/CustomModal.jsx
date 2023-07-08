@@ -16,7 +16,7 @@ export default function CustomModal(props) {
       <Modal isOpen={props.isOpen} onClose={props.onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Insert a new case</ModalHeader>
+          <ModalHeader>Add a new case</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {props.children}
