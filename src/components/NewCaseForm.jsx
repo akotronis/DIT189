@@ -4,14 +4,11 @@ import {
   FormControl,
   FormHelperText,
   FormLabel,
-  Input,
-  Text,
   Textarea,
   useToast,
 } from '@chakra-ui/react';
 import Search from './SearchField';
 import { useState } from 'react';
-import { Form } from 'react-router-dom';
 
 const FETCH_MARRIAGE_URL = `http://localhost:5000/marriages?in_use=true`
 const FETCH_NOTARY_URL =  `http://localhost:5000/users?role=NOTARY&self=0&contains=`
@@ -92,7 +89,7 @@ export default function NewCaseForm(props) {
 
   return (
     <Box maxW="480px">
-      <Form onSubmit={handleSubmit} method="post" action="create">
+      <form onSubmit={handleSubmit} method="post" action="create">
         {/* <FormControl isRequired mb="40px">
           <FormLabel>Task name:</FormLabel>
           <Input type="text" name="title"></Input>
@@ -122,7 +119,7 @@ export default function NewCaseForm(props) {
         <Button type="submit" isDisabled={isSubmitDisabled}>
           Submit
         </Button>
-      </Form>
+      </form>
     </Box>
   );
 }

@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Flex,
   HStack,
@@ -8,17 +7,31 @@ import {
   Text,
 } from '@chakra-ui/react';
 
+import { useCallback } from 'react';
+import { useAuth } from "../context/Auth";
+import { useNavigate } from 'react-router-dom';
+
 export default function Navbar() {
+
+  const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+
+  const logout = useCallback(
+    (e) => {
+      e.preventDefault();
+      setUser(null);
+      navigate("/");
+    },
+    [navigate, setUser]
+  );
+
   return (
-    <Flex as="nav" p="10px" alignItems="center" marginBottom="40px">
-      <Heading as="h1">e-Divorce</Heading>
+    <Flex as="nav" p="10px" alignItems="center" marginBottom="40px" backgroundColor={'blue.500'}>
+      <Heading as="h1" color={"white"}>e-Divorce</Heading>
       <Spacer />
       <HStack spacing="20px">
-        <Box bg="gray.200" p="10px">
-          M
-        </Box>
-        <Text>rocketleague@gmail.com</Text>
-        <Button colorScheme="blue">Logout</Button>
+        <Text color={"white"}>rocketleague@gmail.com</Text>
+        <Button colorScheme="blue" onClick={logout}>Logout</Button>
       </HStack>
     </Flex>
   );
