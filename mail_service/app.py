@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, request
 from flask_mail import Mail, Message
+import json
 
 app = Flask(__name__)
 
@@ -10,14 +11,31 @@ app.config['MAIL_USE_SSL'] = False
 
 mail = Mail(app)
 
-@app.route('/send-email')
-def send_email():
-    sender = 'your-email@example.com'
-    recipient = 'recipient-email@example.com'
-    subject = 'Hello from Flask!'
-    body = 'This is a test email sent from Flask.'
+body = 'This is a test email sent from Flask.'
 
-    msg = Message(subject, sender=sender, recipients=[recipient])
+@app.route('/send-email', methods=['POST'])
+def send_email():
+    
+    # Load the JSON data from the request
+    data = request.get_json()
+
+    # Update the email data if provided in the JSON
+    if 'sender' in data:
+        sender = data['sender']
+    else:
+        return 'No sender specified!'
+    
+    if 'recipients' in data:
+        recipients = data['recipients']
+    else:
+        return 'No recipients specified!'
+    
+    if 'subject' in data:
+        subject = data['subject']
+    else:
+        return 'No subject specified!'
+
+    msg = Message(subject, sender=sender, recipients=recipients)
     msg.body = body
 
     try:
