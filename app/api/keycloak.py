@@ -12,9 +12,9 @@ class KeycloakAPI:
     def __init__(self):
         self.url = os.getenv('KEYCLOAK_URI')
         #### jboss image ###
-        self.auth_url = f'{self.url}/auth/'
+        # self.auth_url = f'{self.url}/auth/'
         ### quay.io image ###
-        # self.auth_url = self.url
+        self.auth_url = self.url
         self.master_realm = os.getenv('ADMIN_REALM')
         self.realm = os.getenv('REALM')
         self.admin_client_id = os.getenv('ADMIN_CLIENT_ID')
