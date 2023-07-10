@@ -1,16 +1,18 @@
 export function getCaseMessage(messageId) {
   switch (messageId) {
-    case 1:
+    case "WAIT_LAWYER_2":
       return "Pending second lawyer's approval";
-    case 2:
+    case "WAIT_SPOUSE_1":
       return "Pending spouses' approval";
-    case 3:
+    case "WAIT_SPOUSE_2":
+        return "Pending spouses' approval";
+    case "WAIT_10DAYS":
       return 'In the 10-day waiting period';
-    case 4:
+    case "WAIT_NOTARY":
       return "Pending notary's confirmation";
-    case 5:
-      return 'Case is completed';
-    case 6:
+    case "COMPLETED":
+      return 'Case is completed'; 
+    case "CANCELLED":
       return 'Case is canceled';
     default:
       break;

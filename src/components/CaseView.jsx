@@ -17,22 +17,21 @@ import {
 } from '@chakra-ui/react';
 import {
   CheckCircleIcon,
-  InfoOutlineIcon,
   NotAllowedIcon,
 } from '@chakra-ui/icons';
 import { getCaseReportHistory } from '../utils/getStatusMessages';
 
 export default function CaseView(props) {
   const displayedData = {
-    dateAdded: props.dCase.dateAdded,
+    dateAdded: props.dCase.start_date,
     lawyer1Name: props.dCase.lawyer1Name,
     lawyer2Name: props.dCase.lawyer2Name,
     notaryName: props.dCase.notaryName,
     spouse1Name: props.dCase.spouse1Name,
     spouse2Name: props.dCase.spouse2Name,
-    marriageId: props.dCase.marriageId,
-    marriageDate: props.dCase.registrationDate,
-    finalAgreementText: props.dCase.finalAgreementText,
+    marriageId: props.dCase.marriage.id,
+    marriageDate: props.dCase.marriage.start_date,
+    finalAgreementText: props.dCase.aggrement_text,
   };
 
   const caseHistoryMessages = getCaseReportHistory(props.dCase.status, props.dCase);

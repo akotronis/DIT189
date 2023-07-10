@@ -5,6 +5,10 @@ import { useDisclosure } from '@chakra-ui/react';
 import CustomModal from '../components/CustomModal';
 import NewCaseForm from '../components/NewCaseForm';
 import { useState, useEffect } from 'react';
+
+const CASES_URL = 'http://localhost:5000/cases?self=false'
+
+
 export default function Dashboard() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [cases, setCases] = useState([]);
@@ -16,9 +20,7 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(
-        'http://localhost:3000/cases'
-      ); // Replace with your actual API endpoint
+      const response = await fetch(CASES_URL); // Replace with your actual API endpoint
       const data = await response.json();
       console.log(data);
       setCases(data);

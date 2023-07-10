@@ -1,5 +1,4 @@
 import {
-  Text,
   Button,
   Modal,
   ModalOverlay,
@@ -38,6 +37,8 @@ export default function CasesTable(props) {
     setSelectedCase(null);
   };
 
+  console.log(selectedCase);
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={handleCloseModal} size="auto">
@@ -45,7 +46,7 @@ export default function CasesTable(props) {
         <ModalContent maxW="80%">
           <ModalHeader>
             <HStack justifyContent>
-              <Box> Case #{selectedCase?.id}</Box>
+              <Box> Case #{selectedCase?.id.substring(0, 5) + '...'}</Box>
               <Tag size={'md'} variant="solid" colorScheme="blue">
                 {getCaseMessage(selectedCase?.status)}
               </Tag>
@@ -92,23 +93,25 @@ export default function CasesTable(props) {
             </Tr>
           </Thead>
           <Tbody>
-            {props.cases &&
+            {props.cases.length !== 0 ? (
               props.cases.map((divorceCase) => (
                 <Tr
                   _hover={{ cursor: 'pointer', bg: 'blue.100' }}
                   key={divorceCase.id}
                   onClick={() => handleOpenModal(divorceCase)}
                 >
-                  <Td fontSize={'sm'}>No. {divorceCase.id}</Td>
+                  <Td fontSize={'sm'}>
+                    No. {divorceCase.id.substring(0, 5) + '...'}
+                  </Td>
                   <Td>
                     <Tag size="sm" colorScheme="blue" borderRadius="full">
                       <TagLabel> {getCaseMessage(divorceCase.status)}</TagLabel>
                     </Tag>
                   </Td>
-                  <Td fontSize={'sm'}>{divorceCase.dateAdded}</Td>
+                  <Td fontSize={'sm'}>{divorceCase.start_date}</Td>
                   <Td fontSize={'sm'}>
-                    ID: {divorceCase.marriageId}, R. Date:{' '}
-                    {divorceCase.registrationDate}
+                    ID: {divorceCase.marriage.id.substring(0, 5) + '...'}, R.
+                    Date: {divorceCase.marriage.start_date}
                   </Td>
                   <Td>
                     <Tag size="sm" border="2px" borderRadius="full">
@@ -119,7 +122,12 @@ export default function CasesTable(props) {
                     </Tag>
                   </Td>
                 </Tr>
-              ))}
+              ))
+            ) : (
+              <Tr>
+                <Td>No cases found.</Td>
+              </Tr>
+            )}
           </Tbody>
         </Table>
       </TableContainer>
