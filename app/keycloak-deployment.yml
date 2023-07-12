@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-srv
+  labels:
+    app: keycloak-srv
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: keycloak-srv
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak-srv
+  labels:
+    app: keycloak-srv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak-srv
+  template:
+    metadata:
+      labels:
+        app: keycloak-srv
+    spec:
+      containers:
+        - name: keycloak-srv
+          image: quay.io/keycloak/keycloak:21.1.1
+          args: ["start"]
+          env:
+          #### Keycloak Related vars ####
+            - name: KEYCLOAK_ADMIN
+              value: "admin"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: "password"
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_TRANSACTION_XA_ENABLED
+              value: "false"
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "false"
+            #### Database Related vars ####
+            - name: DB_VENDOR   
+              value: POSTGRES   
+            - name: DB_ADDR     
+              value: postgres
+            - name: DB_DATABASE
+              value: users-db
+            - name: KC_DB_USERNAME
+              value: postgres
+            - name: KC_DB_PASSWORD
+              value: postgres
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /realms/master
+              port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-srv-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "https"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - fake
+      secretName: auth-tls-secret
+  rules:
+  - host: "auth.localtest.me"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: keycloak-srv
+            port:
+              number: 443

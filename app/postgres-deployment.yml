@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  labels:
+    name: postgres
+spec:
+  containers:
+  - name: postgres
+    image: postgres:13.2
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: postgres
+      containerPort: 5432
+    env:
+    - name: POSTGRES_DB
+      value: users-db
+    - name: POSTGRES_USER
+      value: postgres
+    - name: POSTGRES_PASSWORD
+      value: postgres
+    volumeMounts:
+    - name: users-db-data
+      mountPath: /var/lib/postgresql/data
+  volumes:
+  - name: users-db-data
+    hostPath:
+      path: /data
+---
+# expose postgres db for keycloak use
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+--- 
