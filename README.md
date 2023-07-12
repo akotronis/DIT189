@@ -92,8 +92,11 @@ User authentication implemented with [Keycloak](https://www.keycloak.org/), alon
 
 Detailed documentation on endpoints and corresponding schemas available on documentation endpoints
 
-- `http://localhost:5000/swagger-ui`, or
+- `http://localhost:5000/swagger-ui`, or  
+  <p align="left"><img src="./app/resources/swagger.jpg" alt="swagger" width="800"/></p>
 - `http://localhost:5000/redoc`
+
+<!-- ![swagger](./app/resources/swagger.jpg) -->
 
 
 # Instructions

@@ -17,9 +17,10 @@ class Refresh(MethodView):
         Refresh Database. (No authentication token required)
 
         Clean all tables and repopulate Users/Marriages.
-        If `drop=True`, drops all tables first and recreate them.
+        - If `drop=True`, drops all tables first and recreate them.
+        - If `drop=False`, just returns users.
         """
         drop = query_args.get('drop')
-        DataBase.initialize(fresh=True, drop=drop)
+        DataBase.initialize(drop=drop)
         return DataBase.get_users()
         # return jsonify(message='Database Reinitialized'), 200
