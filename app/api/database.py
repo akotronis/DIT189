@@ -233,7 +233,6 @@ class DataBase:
     def update_divorce(cls, **kwargs):
         divorce_id = kwargs.pop('id', None)
         values_dict = {getattr(Divorce, k, None): v for k,v in kwargs.items() if v}
-        print(values_dict)
         Divorce.query.filter_by(id=divorce_id).update(values_dict, synchronize_session=False)
 
         db.session.commit()
@@ -281,6 +280,8 @@ class DataBase:
         if the user can confirm the divorce based on it's role 
         and the divorce status
         """
+        if divorce.status.name in [Divorce.Status.CANCELLED.name, Divorce.Status.COMPLETED.name] :
+            return False
         user_role, user_email = user.role.name, user.email
         user_confirmations = divorce.user_confirmations.filter_by(confirmed=True).all()
         emails_confirmed = [user_divorce.user.email for user_divorce in user_confirmations]
@@ -305,6 +306,8 @@ class DataBase:
         if the user can cancel the divorce based on it's role 
         and the divorce status
         """
+        if divorce.status.name in [Divorce.Status.CANCELLED.name, Divorce.Status.COMPLETED.name] :
+            return False
         if cls.time_elapsed_from_10day_start(divorce) > 10:
             divorce.status = Divorce.Status.WAIT_NOTARY
             db.session.commit()

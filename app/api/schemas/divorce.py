@@ -8,7 +8,8 @@ class DivorceNoMarriageSchema(Schema):
         ordered = True
     id = fields.UUID()
     status = fields.Enum(Divorce.Status)
-    cancelled_by_id = fields.Nested('UserSchema', allow_null=True, default={})
+    # cancelled_by_id = fields.Nested('UserSchema', allow_null=True, default={})
+    cancelled_by_id = fields.UUID()
     start_date = fields.DateTime('%Y-%m-%d')
     end_date = fields.DateTime('%Y-%m-%d')
     aggrement_text = fields.Str()
