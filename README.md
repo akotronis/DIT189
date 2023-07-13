@@ -50,9 +50,12 @@ Implemented with [`marshmallow`](https://marshmallow.readthedocs.io/en/stable/)
 - `marriage`
 - `refresh` (Repopulates database. For development/presentation puprposes)
 
-### Authentication
+### Authentication/Authotization
 
-User authentication implemented with [Keycloak](https://www.keycloak.org/), along with the python library [python-keycloak](https://pypi.org/project/python-keycloak/)
+- User authentication implemented with [Keycloak](https://www.keycloak.org/), along with the python library [python-keycloak](https://pypi.org/project/python-keycloak/)  
+- A [decorator is implemented](https://github.com/akotronis/DIT189/blob/main/app/api/keycloak.py#L157) which performs user authentication and authorization based on role using *Header Authorization Bearer token*  
+- In order to do authentication/authorization from swwagger interface, click *Authorize* button on the top right and paste the user token  
+  This will add the *Authorization Bearer <token>* on each request header,
 
 ### Endpoints
 

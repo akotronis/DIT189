@@ -23,7 +23,7 @@ class DivorceList(MethodView):
 
         Accepts query params:
         - Multiple of type `&status=COMPLETED&status=CANCELLED` etc (Optional)
-        - `self=True/False` to return only divorces (cases) wher user is involved
+        - `self=True/False` to return only divorces (cases) wher user is involved, or all
         - `?contains` to filter objects containing substring in *status, aggrement_text*
         """
         

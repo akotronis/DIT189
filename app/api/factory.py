@@ -31,6 +31,13 @@ def create_app(config_name):
     # Connect flask_smorest to the app
     api = Api(app)
 
+    # Add Authorize button (Authentication functionality) to swagger
+    # https://github.com/marshmallow-code/flask-smorest/issues/36#issuecomment-543858430
+    api.spec.components.security_scheme(
+        "bearerAuth", {"type":"http", "scheme": "bearer", "bearerFormat": "JWT"}
+    )
+    api.spec.options["security"] = [{"bearerAuth": []}]
+
     # Register Blueprints
     register_blueprints(api)
 
