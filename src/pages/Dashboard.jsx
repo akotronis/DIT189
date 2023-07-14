@@ -5,13 +5,17 @@ import { useDisclosure } from '@chakra-ui/react';
 import CustomModal from '../components/CustomModal';
 import NewCaseForm from '../components/NewCaseForm';
 import { useState, useEffect } from 'react';
+import { useAccessToken } from '../context/Auth';
+import { decodeAccessToken } from '../utils/keycloak_utils';
 
-const CASES_URL = 'http://localhost:5000/cases?self=false'
+const CASES_URL = 'http://localhost:5000/cases?self=1';
 
-
-export default function Dashboard() {
+export default function Dashboard(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [cases, setCases] = useState([]);
+  const { token } = useAccessToken();
+
+  console.log(decodeAccessToken(token.accessToken));
 
   const handleNewCase = () => {
     onClose();
@@ -20,7 +24,11 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(CASES_URL); // Replace with your actual API endpoint
+      const response = await fetch(CASES_URL, {
+        headers: {
+          Authorization: `Bearer ${token.accessToken}`,
+        },
+      }); // Replace with your actual API endpoint
       const data = await response.json();
       console.log(data);
       setCases(data);
@@ -34,27 +42,34 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  let newCaseButton = null;
+  if (props.user.role === 'LAWYER') {
+    newCaseButton = (
+      <Button
+        onClick={onOpen}
+        variant="solid"
+        bg="blue.400"
+        color="white"
+        leftIcon={<PlusSquareIcon />}
+      >
+        New case
+      </Button>
+    );
+  }
+
   return (
     <>
       <CustomModal isOpen={isOpen} onClose={onClose}>
-        <NewCaseForm onClose={handleNewCase} />
+        <NewCaseForm onClose={handleNewCase} updateTable={fetchData}/>
       </CustomModal>
       <Flex direction={'column'} gap={'5'}>
-        <HStack>
+        <HStack justify={'space-between'}>
           <Heading as={'h5'} size={'md'}>
             My cases
           </Heading>
-          <Button
-            onClick={onOpen}
-            variant="solid"
-            bg="blue.400"
-            color="white"
-            leftIcon={<PlusSquareIcon />}
-          >
-            New case
-          </Button>
+          {newCaseButton}
         </HStack>
-        <CasesTable cases={cases}/>
+        <CasesTable cases={cases} updateTable={fetchData} loggedInUser={props.user}/>
       </Flex>
     </>
   );

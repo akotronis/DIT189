@@ -18,14 +18,21 @@ import {
   TagLabel,
   Box,
   HStack,
+  Flex,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import CaseView from './CaseView';
-import { getCaseMessage } from '../utils/getStatusMessages';
+import { getCaseMessage, getUsers } from '../utils/api_utils';
+import { useAccessToken } from '../context/Auth';
+import { useToast } from '@chakra-ui/react';
+const UPDATE_CASE_URL_BASE = 'http://localhost:5000/cases/';
+const UPDATE_CASE_URL_SUFFIX = '?confirm=';
+
 export default function CasesTable(props) {
   const [isOpen, setIsOpen] = useState(false);
-
   const [selectedCase, setSelectedCase] = useState(null);
+  const { token } = useAccessToken();
+  const toast = useToast();
 
   const handleOpenModal = (dCase) => {
     setIsOpen(true);
@@ -37,7 +44,61 @@ export default function CasesTable(props) {
     setSelectedCase(null);
   };
 
-  console.log(selectedCase);
+  const handleCaseAction = (decision) => {
+    fetch(
+      UPDATE_CASE_URL_BASE +
+        selectedCase.id +
+        UPDATE_CASE_URL_SUFFIX +
+        decision,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then((response) => {
+        // Handle the response as needed
+        if (response.ok) {
+          console.log(response);
+          props.updateTable();
+          handleCloseModal();
+
+          toast({
+            title: 'Done',
+            description: 'Case was updated.',
+            status: 'success',
+            duration: 9000,
+            isClosable: true,
+          });
+        } else {
+          toast({
+            title: 'Error',
+            description: 'An error from the server has occured.',
+            status: 'error',
+            duration: 9000,
+            isClosable: true,
+          });
+          console.error('Error:', response.status, response);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  };
+
+  let isAcceptButtonDisabled = false;
+  let isCancelButtonDisabled = false;
+  if (selectedCase) {
+    const loggedInUserCaseInfo = selectedCase.user_confirmations.find(
+      (user) => user.user_id === props.loggedInUser.id
+    );
+    console.log(loggedInUserCaseInfo.confirmed);
+
+    isAcceptButtonDisabled = !loggedInUserCaseInfo.can_confirm;
+    isCancelButtonDisabled = !loggedInUserCaseInfo.can_cancel;
+  }
 
   return (
     <>
@@ -58,10 +119,21 @@ export default function CasesTable(props) {
           </ModalBody>
 
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={handleCloseModal}>
+            <Button
+              isDisabled={isCancelButtonDisabled}
+              variant="ghost"
+              mr={3}
+              onClick={() => handleCaseAction(false)}
+            >
               Decline
             </Button>
-            <Button variant="ghost">Accept</Button>
+            <Button
+              isDisabled={isAcceptButtonDisabled}
+              variant="ghost"
+              onClick={() => handleCaseAction(true)}
+            >
+              Accept
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -83,7 +155,11 @@ export default function CasesTable(props) {
         borderColor="blue.400"
       >
         <Table variant="simple">
-          <Thead position="sticky" top={0} bgColor="blue.400">
+          <Thead
+            position="sticky"
+            top={0}
+            bgGradient="linear(to-b, blue.400, teal.400)"
+          >
             <Tr>
               <Th color="white">Case Id</Th>
               <Th color="white">Status</Th>
@@ -94,35 +170,61 @@ export default function CasesTable(props) {
           </Thead>
           <Tbody>
             {props.cases.length !== 0 ? (
-              props.cases.map((divorceCase) => (
-                <Tr
-                  _hover={{ cursor: 'pointer', bg: 'blue.100' }}
-                  key={divorceCase.id}
-                  onClick={() => handleOpenModal(divorceCase)}
-                >
-                  <Td fontSize={'sm'}>
-                    No. {divorceCase.id.substring(0, 5) + '...'}
-                  </Td>
-                  <Td>
-                    <Tag size="sm" colorScheme="blue" borderRadius="full">
-                      <TagLabel> {getCaseMessage(divorceCase.status)}</TagLabel>
-                    </Tag>
-                  </Td>
-                  <Td fontSize={'sm'}>{divorceCase.start_date}</Td>
-                  <Td fontSize={'sm'}>
-                    ID: {divorceCase.marriage.id.substring(0, 5) + '...'}, R.
-                    Date: {divorceCase.marriage.start_date}
-                  </Td>
-                  <Td>
-                    <Tag size="sm" border="2px" borderRadius="full">
-                      <TagLabel>{divorceCase.spouse1Name}</TagLabel>
-                    </Tag>
-                    <Tag ml="10px" size="sm" border="2px" borderRadius="full">
-                      <TagLabel>{divorceCase.spouse2Name}</TagLabel>
-                    </Tag>
-                  </Td>
-                </Tr>
-              ))
+              props.cases.map((divorceCase) => {
+                const users = getUsers(divorceCase);
+
+                let tagColorScheme = 'blue';
+
+                if (divorceCase.status === 'CANCELLED') {
+                  tagColorScheme = 'red';
+                }
+                if (divorceCase.status === 'COMPLETED') {
+                  tagColorScheme = 'green';
+                }
+
+                return (
+                  <Tr
+                    _hover={{ cursor: 'pointer', bg: 'blue.100' }}
+                    key={divorceCase.id}
+                    onClick={() => handleOpenModal(divorceCase)}
+                  >
+                    <Td fontSize={'sm'}>
+                      No. {divorceCase.id.substring(0, 5) + '...'}
+                    </Td>
+                    <Td>
+                      <Tag
+                        size={'sm'}
+                        borderRadius={'full'}
+                        colorScheme={tagColorScheme}
+                      >
+                        <TagLabel>
+                          {getCaseMessage(divorceCase.status)}
+                        </TagLabel>
+                      </Tag>
+                    </Td>
+                    <Td fontSize={'sm'}>{divorceCase.start_date}</Td>
+                    <Td fontSize={'sm'}>
+                      ID: {divorceCase.marriage.id.substring(0, 5) + '...'}, R.
+                      Date: {divorceCase.marriage.start_date}
+                    </Td>
+                    <Td>
+                      <Flex>
+                        <Tag size="sm" border="2px" borderRadius="full">
+                          <TagLabel>{users.spouse1Name}</TagLabel>
+                        </Tag>
+                        <Tag
+                          ml="10px"
+                          size="sm"
+                          border="2px"
+                          borderRadius="full"
+                        >
+                          <TagLabel>{users.spouse2Name}</TagLabel>
+                        </Tag>
+                      </Flex>
+                    </Td>
+                  </Tr>
+                );
+              })
             ) : (
               <Tr>
                 <Td>No cases found.</Td>

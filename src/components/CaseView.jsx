@@ -15,26 +15,25 @@ import {
   ListItem,
   CardFooter,
 } from '@chakra-ui/react';
-import {
-  CheckCircleIcon,
-  NotAllowedIcon,
-} from '@chakra-ui/icons';
-import { getCaseReportHistory } from '../utils/getStatusMessages';
+import { CheckCircleIcon, NotAllowedIcon } from '@chakra-ui/icons';
+import { getCaseReportHistory, getUsers } from '../utils/api_utils';
 
 export default function CaseView(props) {
+  const users = getUsers(props.dCase);
+
   const displayedData = {
     dateAdded: props.dCase.start_date,
-    lawyer1Name: props.dCase.lawyer1Name,
-    lawyer2Name: props.dCase.lawyer2Name,
-    notaryName: props.dCase.notaryName,
-    spouse1Name: props.dCase.spouse1Name,
-    spouse2Name: props.dCase.spouse2Name,
+    lawyer1Name: users.lawyer1Name,
+    lawyer2Name: users.lawyer2Name,
+    notaryName: users.notaryName,
+    spouse1Name: users.spouse1Name,
+    spouse2Name: users.spouse2Name,
     marriageId: props.dCase.marriage.id,
     marriageDate: props.dCase.marriage.start_date,
     finalAgreementText: props.dCase.aggrement_text,
   };
 
-  const caseHistoryMessages = getCaseReportHistory(props.dCase.status, props.dCase);
+  const caseHistoryMessages = getCaseReportHistory(props.dCase, users);
 
   return (
     <Card>
@@ -94,13 +93,17 @@ export default function CaseView(props) {
               {displayedData.finalAgreementText}
             </Text>
           </Box>
-          <Box bg={ props.dCase.status === 6 ? "red.200" : "blue.100"} padding="10px" borderRadius="10px">
+          <Box
+            bg={props.dCase.status === 'CANCELLED' ? 'red.200' : 'blue.100'}
+            padding="10px"
+            borderRadius="10px"
+          >
             <List spacing={3}>
               {caseHistoryMessages.map((msg) => (
-                <ListItem>
+                <ListItem key={msg}>
                   <ListIcon
                     as={
-                      props.dCase.status === 6
+                      props.dCase.status === 'CANCELLED'
                         ? NotAllowedIcon
                         : CheckCircleIcon
                     }
@@ -114,7 +117,6 @@ export default function CaseView(props) {
         </Stack>
       </CardBody>
       <CardFooter>
-        {' '}
         <Box>
           <Text color="gray.500">Added on: {displayedData.dateAdded}</Text>
         </Box>

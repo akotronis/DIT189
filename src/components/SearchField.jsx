@@ -19,17 +19,20 @@ export default function Search(props) {
     // Example:
 
     if (props.url.includes('marriage')) {
-      inputValue = ''
+      inputValue = '';
     }
 
-
-    fetch(props.url + inputValue)
+    fetch(props.url + inputValue, {
+      headers: {
+        Authorization: `Bearer ${props.accessToken}`,
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
 
         const options = data.map((item) => {
-          let label = null
+          let label = null;
           if (props.url.includes('marriage')) {
             label = `Marriage ID:  ${item.id}\nStarting date: ${item.start_date}\nSpouses:\n   1.  Fullname (VAT):  ${item.users[0].last_name} ${item.users[0].first_name} (${item.users[0].vat_num})\n        Email:                  ${item.users[0].email}\n   2.  Fullname (VAT):  ${item.users[1].last_name} ${item.users[1].first_name} (${item.users[1].vat_num})\n        Email:                  ${item.users[1].email}`;
           } else if (
@@ -41,7 +44,6 @@ export default function Search(props) {
           return {
             value: item.id,
             label: label,
-            data: "kati",
           };
         });
         callback(options);

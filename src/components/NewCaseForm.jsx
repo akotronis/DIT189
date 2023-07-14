@@ -9,18 +9,19 @@ import {
 } from '@chakra-ui/react';
 import Search from './SearchField';
 import { useState } from 'react';
-
-const FETCH_MARRIAGE_URL = `http://localhost:5000/marriages?in_use=true`
-const FETCH_NOTARY_URL =  `http://localhost:5000/users?role=NOTARY&self=0&contains=`
-const FETCH_LAWYER_URL =  `http://localhost:5000/users?role=LAWYER&self=0&contains=`
-const POST_DIVORCE_CASE_URL = "http://localhost:5000/cases"
+import { useAccessToken } from '../context/Auth';
+const FETCH_MARRIAGE_URL = `http://localhost:5000/marriages?in_use=true`;
+const FETCH_NOTARY_URL = `http://localhost:5000/users?&self=0&role=NOTARY&contains=`;
+const FETCH_LAWYER_URL = `http://localhost:5000/users?&self=0&role=LAWYER&self=0&contains=`;
+const POST_DIVORCE_CASE_URL = 'http://localhost:5000/cases';
 
 export default function NewCaseForm(props) {
+  const { token } = useAccessToken();
   const [selectedMarriage, setSelectedMarriage] = useState(null);
   const [selectedNotary, setSelectedNotary] = useState(null);
   const [selectedLawyer, setSelectedLawyer] = useState(null);
 
-  const toast = useToast()
+  const toast = useToast();
 
   const handleMarriage = (selectedOption) => {
     setSelectedMarriage(selectedOption);
@@ -48,35 +49,36 @@ export default function NewCaseForm(props) {
       aggrement_text: agreementText,
     };
 
-
     // Perform the POST request using the form data
     fetch(POST_DIVORCE_CASE_URL, {
       method: 'POST',
       body: JSON.stringify(postData),
       headers: {
+        Authorization: `Bearer ${token.accessToken}`,
         'Content-Type': 'application/json',
       },
     })
       .then((response) => {
-        console.log(postData)
+        console.log(postData);
         // Handle the response as needed
         if (response.ok) {
           console.log(response);
+          props.updateTable();
           toast({
             title: 'Done',
-            description: "A new case was submitted.",
+            description: 'A new case was submitted.',
             status: 'success',
             duration: 9000,
             isClosable: true,
-          })
+          });
         } else {
           toast({
             title: 'Error',
-            description: "An error from the server has occured.",
+            description: 'An error from the server has occured.',
             status: 'error',
             duration: 9000,
             isClosable: true,
-          })
+          });
           console.error('Error:', response.status, response);
         }
       })
@@ -85,7 +87,8 @@ export default function NewCaseForm(props) {
       });
   };
 
-  const isSubmitDisabled = !selectedLawyer || !selectedMarriage || !selectedNotary;
+  const isSubmitDisabled =
+    !selectedLawyer || !selectedMarriage || !selectedNotary;
 
   return (
     <Box maxW="480px">
@@ -96,17 +99,32 @@ export default function NewCaseForm(props) {
         </FormControl> */}
         <FormControl mb="40px" isRequired>
           <FormLabel>Marriage:</FormLabel>
-          <Search url={FETCH_MARRIAGE_URL} value={selectedMarriage} onChange={handleMarriage} />
+          <Search
+            accessToken={token.accessToken}
+            url={FETCH_MARRIAGE_URL}
+            value={selectedMarriage}
+            onChange={handleMarriage}
+          />
           <FormHelperText>Select marriage</FormHelperText>
         </FormControl>
         <FormControl mb="40px" isRequired>
           <FormLabel>Second Lawyer:</FormLabel>
-          <Search url={FETCH_LAWYER_URL} value={selectedLawyer} onChange={handleLawyer} />
+          <Search
+            accessToken={token.accessToken}
+            url={FETCH_LAWYER_URL}
+            value={selectedLawyer}
+            onChange={handleLawyer}
+          />
           <FormHelperText>Select second lawyer</FormHelperText>
         </FormControl>
         <FormControl mb="40px" isRequired>
           <FormLabel>Notary:</FormLabel>
-          <Search url={FETCH_NOTARY_URL} value={selectedNotary} onChange={handleNotary} />
+          <Search
+            accessToken={token.accessToken}
+            url={FETCH_NOTARY_URL}
+            value={selectedNotary}
+            onChange={handleNotary}
+          />
           <FormHelperText>Select notary</FormHelperText>
         </FormControl>
         <FormControl isRequired mb="40px">
