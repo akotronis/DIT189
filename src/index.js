@@ -5,6 +5,7 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import reportWebVitals from './reportWebVitals';
 import * as serviceWorker from './serviceWorker';
+import { AccessTokenProvider } from './context/Auth';
 
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
@@ -13,10 +14,10 @@ root.render(
   <StrictMode>
     <ColorModeScript />
     <BrowserRouter>
-
-    <App />
+      <AccessTokenProvider>
+        <App />
+      </AccessTokenProvider>
     </BrowserRouter>
-
   </StrictMode>
 );
 

@@ -1,45 +1,40 @@
 import React from 'react';
-import { Flex, Box } from '@chakra-ui/react';
-import { Outlet } from 'react-router-dom';
+import UserInfo from '../components/UserInfo';
 import Navbar from '../components/Navbar';
-
-const customStyles = {
-  height: '100vh',
-  backgroundColor: '#ebebeb', // Change the background color as desired
-};
-
+import Dashboard from '../pages/Dashboard';
+import { GridItem, Grid } from '@chakra-ui/react';
+import { LoggedInHOC } from './LoggedinHOC';
 export default function RootLayout() {
   return (
-    <Flex direction="column" align="center" style={customStyles}>
-      <Box w="100%">
+    <Grid templateColumns="repeat(6, 1fr)" h="100%" gap={4}>
+      <GridItem
+        as="header"
+        colSpan={6}
+        bg="blue.400"
+        minHeight="60px"
+        bgGradient="linear(to-r, blue.400, teal.400)"
+        boxShadow="0px 5px 10px rgba(0, 0, 0, 0.4)"
+
+      >
         <Navbar />
-      </Box>
-        <Box
-          w="95%"
-          p="20px"
-          borderRadius="10px"
-          bg="white"
-          boxShadow="0px 2px 4px rgba(0, 0, 0, 0.2)"
-        >
-          <Outlet />
-        </Box>
-    </Flex>
+      </GridItem>
+      <GridItem
+        as="aside"
+        colSpan={{ base: 6, lg: 2, xl: 1 }}
+        p="20px"
+        boxShadow="5px 5px 12px rgba(0, 0, 0, 0.5)"
+        m="15px"
+        borderRadius={"8px"}
+      >
+        <LoggedInHOC>
+          <UserInfo />
+        </LoggedInHOC>
+      </GridItem>
+      <GridItem as="main" colSpan={{ base: 6, lg: 4, xl: 5 }} p="40px" >
+        <LoggedInHOC>
+          <Dashboard />
+        </LoggedInHOC>
+      </GridItem>
+    </Grid>
   );
 }
-// <Grid templateColumns="repeat(6, 1fr)" bg="gray.50">
-//   <GridItem
-//     as="aside"
-//     colSpan={{ base: 6, lg: 2, xl: 1 }}
-//     bg="blue.400"
-//     minHeight={{lg: "100vh"}}
-//     p={{ base: '20px', lg: '30px' }}
-//   >
-//     <span><Sidebar/></span>
-//   </GridItem>
-//   <GridItem as="main" colSpan={{ base: 6, lg: 4, xl: 5 }} p="40px">
-//     <Navbar />
-//     <Outlet />
-//   </GridItem>
-// </Grid>
-//   );
-// }

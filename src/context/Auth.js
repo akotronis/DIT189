@@ -1,32 +1,47 @@
-import { createContext, useContext, useState } from "react";
-import { useLocation, Navigate, Outlet } from "react-router-dom";
-import { useLocalStorage } from "../utils/useLocalStorage";
-const AuthContext = createContext(null);
+import React, { createContext, useContext, useEffect, useState } from 'react';
+// Create a new context for the access token
+const AccessTokenContext = createContext();
+export const useAccessToken = () => useContext(AccessTokenContext);
 
-export const useAuth = () => useContext(AuthContext);
+export const AccessTokenProvider = ({ children }) => {
+  const [token, setToken] = useState('');
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useLocalStorage("user", null);;
+  useEffect(() => {
+    // Check if the access token is already saved in local storage
+    const storedAccessToken = localStorage.getItem('accessToken');
+    const storedRefreshToken = localStorage.getItem('refreshToken');
+
+    if (storedAccessToken && storedRefreshToken) {
+      setToken({
+        accessToken: storedAccessToken,
+        refreshToken: storedRefreshToken,
+      });
+    }
+  }, []);
+
+  const saveToken = (token) => {
+    // Save the access token to local storage
+    localStorage.setItem('accessToken', token.accessToken);
+    localStorage.setItem('refreshToken', token.refreshToken);
+
+    // Update the access token in the context
+    setToken(token);
+  };
+
+  const removeAccessToken = () => {
+    // Remove the access token from local storage
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+
+    // Clear the access token in the context
+    setToken('');
+  };
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AccessTokenContext.Provider
+      value={{ token, saveToken, removeAccessToken }}
+    >
       {children}
-    </AuthContext.Provider>
+    </AccessTokenContext.Provider>
   );
-};
-
-export const RequireAuth = () => {
-  const { user } = useAuth();
-  const location = useLocation();
-
-  if (!user) {
-    return (
-      <Navigate
-        to={{ pathname: "/", state: { from: location } }}
-        replace
-      />
-    );
-  }
-
-  return <Outlet />;
 };
