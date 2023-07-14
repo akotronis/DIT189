@@ -6,8 +6,6 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button, 
-  Text
 } from '@chakra-ui/react';
 
 export default function CustomModal(props) {

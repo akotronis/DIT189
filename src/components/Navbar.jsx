@@ -1,38 +1,59 @@
-import {
-  Button,
-  Flex,
-  HStack,
-  Heading,
-  Spacer,
-  Text,
-} from '@chakra-ui/react';
-
-import { useCallback } from 'react';
-import { useAuth } from "../context/Auth";
-import { useNavigate } from 'react-router-dom';
+import { Box, Button, HStack, Heading, Spacer } from '@chakra-ui/react';
+import keycloakCredentials from '../keycloak/getKeycloakCredentials';
+import { useAccessToken } from '../context/Auth';
+const KC_LOGOUT_URL =
+  'http://localhost:8080/realms/DIT189/protocol/openid-connect/logout';
 
 export default function Navbar() {
+  const { token, removeAccessToken } = useAccessToken();
+  const refreshToken = token.refreshToken;
+  const headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  };
 
-  const { user, setUser } = useAuth();
-  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(KC_LOGOUT_URL, {
+        method: 'POST',
+        headers: headers,
+        body: new URLSearchParams({
+          client_id: keycloakCredentials.clientId,
+          client_secret: keycloakCredentials.clientSecret,
+          refresh_token: refreshToken,
+        }),
+      });
 
-  const logout = useCallback(
-    (e) => {
-      e.preventDefault();
-      setUser(null);
-      navigate("/");
-    },
-    [navigate, setUser]
-  );
+      if (response.ok) {
+        // Logout was successful, perform any necessary cleanup or redirection
+        console.log('Logout successful');
+        removeAccessToken();
+      } else {
+        // Handle logout failure
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error occurred during logout:', error);
+    }
+  };
 
   return (
-    <Flex as="nav" p="10px" alignItems="center" marginBottom="40px" backgroundColor={'blue.500'}>
-      <Heading as="h1" color={"white"}>e-Divorce</Heading>
-      <Spacer />
+    <Box px="20px" py="10px">
       <HStack spacing="20px">
-        <Text color={"white"}>rocketleague@gmail.com</Text>
-        <Button colorScheme="blue" onClick={logout}>Logout</Button>
+        <Heading as="h1" fontSize="xl" color="white">
+          e-Divorce
+        </Heading>
+        <Spacer />
+        <Button
+          onClick={handleLogout}
+          colorScheme="whiteAlpha"
+          variant="solid"
+          color="blue.400"
+          bg="white"
+          _hover={{ bg: 'blue.200' }}
+        >
+          Logout
+        </Button>
       </HStack>
-    </Flex>
+    </Box>
   );
 }
