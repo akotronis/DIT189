@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
+from flask_cors import cross_origin
 from flask_mail import Mail, Message
 import json
 
@@ -28,6 +29,7 @@ states = {
 
 
 @app.route('/send-email', methods=['POST'])
+@cross_origin()
 def send_email():
     
     data = request.get_json()
