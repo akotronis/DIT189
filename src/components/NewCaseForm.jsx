@@ -10,7 +10,7 @@ import {
 import Search from './SearchField';
 import { useState } from 'react';
 import { useAccessToken } from '../context/Auth';
-import { MARRIAGES_URL, NOTARIES_URL, LAWYERS_URL, CASES_URL } from '../config/urls';
+import { MARRIAGES_URL, NOTARIES_URL, LAWYERS_URL, CASES_URL } from '../config/config';
 
 export default function NewCaseForm(props) {
   const { token } = useAccessToken();

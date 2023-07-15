@@ -1,7 +1,7 @@
 import { Box, Button, HStack, Heading, Spacer } from '@chakra-ui/react';
 import keycloakCredentials from '../keycloak/getKeycloakCredentials';
 import { useAccessToken } from '../context/Auth';
-import { KEYCLOAK_LOGOUT_URL } from '../config/urls';
+import { KEYCLOAK_LOGOUT_URL } from '../config/config';
 
 export default function Navbar() {
   const { token, removeAccessToken } = useAccessToken();

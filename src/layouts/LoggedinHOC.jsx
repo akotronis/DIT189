@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAccessToken } from '../context/Auth';
 import { decodeAccessToken } from '../utils/keycloak_utils';
 import { useEffect } from 'react';
-import { USERS_URL } from '../config/urls';
+import { USERS_URL } from '../config/config';
 
 export const LoggedInHOC = (props) => {
   let [user, setUser] = useState([]);

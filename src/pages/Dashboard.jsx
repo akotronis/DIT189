@@ -7,7 +7,7 @@ import NewCaseForm from '../components/NewCaseForm';
 import { useState, useEffect } from 'react';
 import { useAccessToken } from '../context/Auth';
 import { decodeAccessToken } from '../utils/keycloak_utils';
-import { CASES_FETCH_URL } from '../config/urls';
+import { CASES_FETCH_URL } from '../config/config';
 
 export default function Dashboard(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();

@@ -1,4 +1,4 @@
-import { KEYCLOAK_URL } from "../config/urls";
+import { KEYCLOAK_URL } from '../config/config';
 function generateRandomString(length) {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -11,14 +11,12 @@ function generateRandomString(length) {
   return randomString;
 }
 
-
 const keycloakCredentials = {
   kcUrl: KEYCLOAK_URL,
-  realm: 'DIT189',
-  clientId: 'edivorce-frontend',
-  clientSecret: 'LlgDke8XNsI9qscSTF59j1yQgFAfsHRB',
+  realm: process.env.REACT_APP_KEYCLOAK_REALM,
+  clientId: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
+  clientSecret: process.env.REACT_APP_KEYCLOAK_CLIENT_SECRET,
   randomString: generateRandomString(14),
 };
-
 
 export default keycloakCredentials;

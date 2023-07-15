@@ -22,7 +22,7 @@ const Login = () => {
     newUrl.searchParams.delete('code');
     newUrl.searchParams.delete('state');
     newUrl.searchParams.delete('session_state');
-
+    console.log(process.env.REACT_APP_BACKEND_API_URL);
     window.history.pushState({}, '', newUrl);
     if (authorizationCode && !token.accessToken) {
       // Exchange the authorization code for an access token
