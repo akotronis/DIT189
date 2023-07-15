@@ -25,8 +25,7 @@ import CaseView from './CaseView';
 import { getCaseMessage, getUsers } from '../utils/api_utils';
 import { useAccessToken } from '../context/Auth';
 import { useToast } from '@chakra-ui/react';
-const UPDATE_CASE_URL_BASE = 'http://localhost:5000/cases/';
-const UPDATE_CASE_URL_SUFFIX = '?confirm=';
+import { CASES_URL, CASE_UPDATE_URL_SUFFIX } from '../config/urls';
 
 export default function CasesTable(props) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,10 +45,7 @@ export default function CasesTable(props) {
 
   const handleCaseAction = (decision) => {
     fetch(
-      UPDATE_CASE_URL_BASE +
-        selectedCase.id +
-        UPDATE_CASE_URL_SUFFIX +
-        decision,
+      CASES_URL + '/' + selectedCase.id + CASE_UPDATE_URL_SUFFIX + decision,
       {
         method: 'PUT',
         headers: {

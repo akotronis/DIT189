@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { useAccessToken } from '../context/Auth';
 import { decodeAccessToken } from '../utils/keycloak_utils';
 import { useEffect } from 'react';
+import { USERS_URL } from '../config/urls';
 
-const USERS_URL = 'http://localhost:5000/users?self=1&contains=';
-
-export const LoggedInHOC = ( props ) => {
+export const LoggedInHOC = (props) => {
   let [user, setUser] = useState([]);
 
   const { token } = useAccessToken();
@@ -30,6 +29,7 @@ export const LoggedInHOC = ( props ) => {
     fetchData();
   }, [token.accessToken, userEmail, setUser]);
 
-  const ClonedChildren = React.cloneElement(props.children,{user});
+  const ClonedChildren = React.cloneElement(props.children, { user });
 
-  return <div className="hoc">{ClonedChildren}</div>};
+  return <div className="hoc">{ClonedChildren}</div>;
+};

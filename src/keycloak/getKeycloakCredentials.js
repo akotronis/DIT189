@@ -1,3 +1,4 @@
+import { KEYCLOAK_URL } from "../config/urls";
 function generateRandomString(length) {
   const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let randomString = '';
@@ -12,7 +13,7 @@ function generateRandomString(length) {
 
 
 const keycloakCredentials = {
-  kcUrl: 'http://localhost:8080',
+  kcUrl: KEYCLOAK_URL,
   realm: 'DIT189',
   clientId: 'edivorce-frontend',
   clientSecret: 'LlgDke8XNsI9qscSTF59j1yQgFAfsHRB',

@@ -10,10 +10,7 @@ import {
 import Search from './SearchField';
 import { useState } from 'react';
 import { useAccessToken } from '../context/Auth';
-const FETCH_MARRIAGE_URL = `http://localhost:5000/marriages?in_use=true`;
-const FETCH_NOTARY_URL = `http://localhost:5000/users?&self=0&role=NOTARY&contains=`;
-const FETCH_LAWYER_URL = `http://localhost:5000/users?&self=0&role=LAWYER&self=0&contains=`;
-const POST_DIVORCE_CASE_URL = 'http://localhost:5000/cases';
+import { MARRIAGES_URL, NOTARIES_URL, LAWYERS_URL, CASES_URL } from '../config/urls';
 
 export default function NewCaseForm(props) {
   const { token } = useAccessToken();
@@ -50,7 +47,7 @@ export default function NewCaseForm(props) {
     };
 
     // Perform the POST request using the form data
-    fetch(POST_DIVORCE_CASE_URL, {
+    fetch(CASES_URL, {
       method: 'POST',
       body: JSON.stringify(postData),
       headers: {
@@ -101,7 +98,7 @@ export default function NewCaseForm(props) {
           <FormLabel>Marriage:</FormLabel>
           <Search
             accessToken={token.accessToken}
-            url={FETCH_MARRIAGE_URL}
+            url={MARRIAGES_URL}
             value={selectedMarriage}
             onChange={handleMarriage}
           />
@@ -111,7 +108,7 @@ export default function NewCaseForm(props) {
           <FormLabel>Second Lawyer:</FormLabel>
           <Search
             accessToken={token.accessToken}
-            url={FETCH_LAWYER_URL}
+            url={LAWYERS_URL}
             value={selectedLawyer}
             onChange={handleLawyer}
           />
@@ -121,7 +118,7 @@ export default function NewCaseForm(props) {
           <FormLabel>Notary:</FormLabel>
           <Search
             accessToken={token.accessToken}
-            url={FETCH_NOTARY_URL}
+            url={NOTARIES_URL}
             value={selectedNotary}
             onChange={handleNotary}
           />

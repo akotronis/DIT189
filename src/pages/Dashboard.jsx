@@ -7,8 +7,7 @@ import NewCaseForm from '../components/NewCaseForm';
 import { useState, useEffect } from 'react';
 import { useAccessToken } from '../context/Auth';
 import { decodeAccessToken } from '../utils/keycloak_utils';
-
-const CASES_URL = 'http://localhost:5000/cases?self=1';
+import { CASES_FETCH_URL } from '../config/urls';
 
 export default function Dashboard(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -24,7 +23,7 @@ export default function Dashboard(props) {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(CASES_URL, {
+      const response = await fetch(CASES_FETCH_URL, {
         headers: {
           Authorization: `Bearer ${token.accessToken}`,
         },

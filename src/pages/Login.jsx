@@ -33,7 +33,7 @@ const Login = () => {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: `client_id=${keycloakCredentials.clientId}&client_secret=${keycloakCredentials.clientSecret}&grant_type=authorization_code&code=${authorizationCode}&redirect_uri=https://localhost:3000/`,
+          body: `client_id=${keycloakCredentials.clientId}&client_secret=${keycloakCredentials.clientSecret}&grant_type=authorization_code&code=${authorizationCode}`,
         }
       )
         .then((response) => response.json())

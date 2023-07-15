@@ -1,8 +1,7 @@
 import { Box, Button, HStack, Heading, Spacer } from '@chakra-ui/react';
 import keycloakCredentials from '../keycloak/getKeycloakCredentials';
 import { useAccessToken } from '../context/Auth';
-const KC_LOGOUT_URL =
-  'http://localhost:8080/realms/DIT189/protocol/openid-connect/logout';
+import { KEYCLOAK_LOGOUT_URL } from '../config/urls';
 
 export default function Navbar() {
   const { token, removeAccessToken } = useAccessToken();
@@ -13,7 +12,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch(KC_LOGOUT_URL, {
+      const response = await fetch(KEYCLOAK_LOGOUT_URL, {
         method: 'POST',
         headers: headers,
         body: new URLSearchParams({
