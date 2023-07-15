@@ -1,8 +1,10 @@
 from flask import Flask, request
+from flask_cors import CORS
 from flask_mail import Mail, Message
 import json
 
 app = Flask(__name__)
+# CORS(app)
 
 app.config['MAIL_SERVER'] = 'mailhog'
 app.config['MAIL_PORT'] = 1025
@@ -11,11 +13,13 @@ app.config['MAIL_USE_SSL'] = False
 
 mail = Mail(app)
 
+CORS(app, support_credentials=True)
+
 sender_email = "consensual.divorce@gmail.com"
 
 states = {
     "INITIALIZED": "Divorce {divorce} was initialized by {role} {name} {surname}.",
-    "UPDATED": "Divorce {divorce} was updated by {role} {name} {surname}.",
+    "CONFIRMED": "Divorce {divorce} was confirmed by {role} {name} {surname}.",
     "CANCELLED": "Divorce {divorce} was cancelled by {role} {name} {surname}.",
     "WAITING_PERIOD_STARTED": "10 day waiting period of divorce {divorce} has started.",
     "WAITING_PERIOD_ENDED": "10 day waiting period of divorce {divorce} has ended.",
@@ -74,7 +78,7 @@ def send_email():
     msg = Message(state, sender=sender_email, recipients=recipients)
    
     state = state.upper()
-    if(state == "INITIALIZED" or state == "UPDATED" or state == "CANCELLED"):
+    if(state == "INITIALIZED" or state == "CONFIRMED" or state == "CANCELLED"):
         temp = states[state]
         temp = temp.replace("{role}", role)
         temp = temp.replace("{divorce}", divorce)
@@ -97,4 +101,4 @@ def send_email():
         return "An error occurred while sending the email: " + str(e)
     
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=True, port=5050)

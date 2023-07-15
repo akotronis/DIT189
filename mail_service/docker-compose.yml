@@ -1,24 +1,25 @@
-version: '3'
-services:
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - 8025:8025  # MailHog web interface
-      - 1025:1025  # MailHog SMTP server
-    networks:
-      - notifications-network
+# version: '3'
+# services:
+#   mailhog:
+#     image: mailhog/mailhog
+#     container_name: mailhog
+#     ports:
+#       - 8025:8025  # MailHog web interface
+#       - 1025:1025  # MailHog SMTP server
+#     # networks:
+#     #   - notifications-network
 
-  notifications-app:
-    container_name: notifications-app
-    build:
-      context: .
-      dockerfile: Notifications.dockerfile
-    ports:
-      - 5000:5000  # Notifications app port
-    depends_on:
-      - mailhog
-    networks:
-      - notifications-network
+#   notifications-app:
+#     image: notifications-img
+#     container_name: notifications
+#     build:
+#       context: .
+#     ports:
+#       - 5050:5050  # Notifications app port
+#     depends_on:
+#       - mailhog
+#     # networks:
+#     #   - notifications-network
 
-networks:
-  notifications-network:
+# # networks:
+# #   notifications-network:

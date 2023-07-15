@@ -10,4 +10,4 @@ COPY . .
 
 CMD ["python", "app.py"]
 
-EXPOSE 5000
+EXPOSE 5050
