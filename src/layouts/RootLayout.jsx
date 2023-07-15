@@ -1,9 +1,9 @@
 import React from 'react';
-import UserInfo from '../components/UserInfo';
-import Navbar from '../components/Navbar';
-import Dashboard from '../pages/Dashboard';
+import UserInfo from '../components/UI/UserInfo';
+import Navbar from '../components/UI/Navbar';
+import Dashboard from '../components/UI/MainContent';
 import { GridItem, Grid } from '@chakra-ui/react';
-import { LoggedInHOC } from './LoggedinHOC';
+import { LoggedInHOC } from '../hocs/LoggedinHOC';
 export default function RootLayout() {
   return (
     <Grid templateColumns="repeat(6, 1fr)" h="100%" gap={4}>

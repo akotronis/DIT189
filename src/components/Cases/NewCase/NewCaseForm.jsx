@@ -7,10 +7,10 @@ import {
   Textarea,
   useToast,
 } from '@chakra-ui/react';
-import Search from './SearchField';
+import Search from './CaseItemSearchField';
 import { useState } from 'react';
-import { useAccessToken } from '../context/Auth';
-import { MARRIAGES_URL, NOTARIES_URL, LAWYERS_URL, CASES_URL } from '../config/config';
+import { useAccessToken } from '../../../context/Auth';
+import { MARRIAGES_URL, NOTARIES_URL, LAWYERS_URL, CASES_URL } from '../../../config/config';
 
 export default function NewCaseForm(props) {
   const { token } = useAccessToken();

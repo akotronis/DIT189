@@ -16,7 +16,7 @@ import {
   CardFooter,
 } from '@chakra-ui/react';
 import { CheckCircleIcon, NotAllowedIcon } from '@chakra-ui/icons';
-import { getCaseReportHistory, getUsers } from '../utils/api_utils';
+import { getCaseReportHistory, getUsers } from '../../utils/api_utils';
 
 export default function CaseView(props) {
   const users = getUsers(props.dCase);

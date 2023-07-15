@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAccessToken } from '../context/Auth';
-import keycloakCredentials from '../keycloak/getKeycloakCredentials';
+import { keycloakCredentials } from '../config/config';
 import RootLayout from '../layouts/RootLayout';
 import { Box, Heading, Text, Button } from '@chakra-ui/react';
 

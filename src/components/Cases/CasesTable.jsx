@@ -22,10 +22,10 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import CaseView from './CaseView';
-import { getCaseMessage, getUsers } from '../utils/api_utils';
-import { useAccessToken } from '../context/Auth';
+import { getCaseMessage, getUsers } from '../../utils/api_utils';
+import { useAccessToken } from '../../context/Auth';
 import { useToast } from '@chakra-ui/react';
-import { CASES_URL, CASE_UPDATE_URL_SUFFIX } from '../config/config';
+import { CASES_URL, CASE_UPDATE_URL_SUFFIX } from '../../config/config';
 
 export default function CasesTable(props) {
   const [isOpen, setIsOpen] = useState(false);
