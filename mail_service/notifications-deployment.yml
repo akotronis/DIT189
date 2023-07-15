@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: mailhog
-        image: docker.io/itp22103/mailhog-image:v1.0
+        image: mailhog/mailhog
         ports:
         - containerPort: 8025
         - containerPort: 1025
