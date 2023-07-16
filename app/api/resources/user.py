@@ -71,3 +71,20 @@ class UserList(MethodView):
         kclk.create_user(user_data)
         token = kclk.get_token_from_credentials(email, password).get('access_token')
         return jsonify(email=email, token=token), 201
+    
+
+@blp.route('/users/<uuid:user_id>')
+class UserDetail(MethodView):
+    @blp.response(200, KeycloakUserOutputSchema)
+    def get(self, user_id):
+        """
+        Get an api db user's token if user is in Keycloak (No authentication token required)
+        """
+        user = DataBase.get_users(id=user_id).first()
+        if not user:
+            abort(404, message="Can't find user")
+        email = user.email
+        token = kclk.get_token_from_credentials(email, 'password').get('access_token')
+        if not token:
+            abort(404, message="User not in Keycloak")
+        return jsonify(email=email, token=token), 200

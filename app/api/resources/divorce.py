@@ -93,7 +93,7 @@ class DivorceList(MethodView):
 
 @blp.route('/cases/<uuid:case_id>')
 class DivorceDetail(MethodView):
-    # @kclk.token_required()
+    @kclk.token_required()
     @blp.response(200, DivorceSchema)
     def get(self, case_id):
         """
