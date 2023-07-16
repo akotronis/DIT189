@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-api-db-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-api-db
+  template:
+    metadata:
+      labels:
+        app: postgres-api-db
+    spec:
+      containers:
+        - name: postgres-api-db-container
+          image: postgres:13.2
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: api-db
+          ports:
+            - containerPort: 5432
+              name: postgres-api-db
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-api-db-service
+spec:
+  selector:
+    app: postgres-api-db
+  ports:
+    - name: postgres-api-db
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
