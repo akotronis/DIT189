@@ -58,7 +58,6 @@ export default function CasesTable(props) {
         // Handle the response as needed
         if (response.ok) {
           console.log(response);
-          console.log(selectedCase);
 
           let divorce = selectedCase["id"];
 
@@ -67,7 +66,7 @@ export default function CasesTable(props) {
             "surname": props.loggedInUser["last_name"],
             "role": props.loggedInUser["role"],
             "email": props.loggedInUser["email"]
-          }
+          };
 
           let state = ""
           switch (selectedCase["status"]) {
@@ -100,6 +99,8 @@ export default function CasesTable(props) {
             case "COMPLETED":
             case "CANCELLED":
               break;
+            default:
+              break;
           }
 
           let recipients = []
@@ -113,23 +114,31 @@ export default function CasesTable(props) {
             "divorce": divorce,
             "user": logged_in_user,
             "recipients": recipients
-          }
+          };
 
-          if (state != "") {
-            fetch(
-              NOTIFICATIONS_URL,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(notification)
-              }
+          console.log(notification);
+
+          if (state !== "") {
+            fetch(NOTIFICATIONS_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(notification)
+            }
             )
-              .catch((error) => {
-                console.error('Error:', error);
+              .then((notification_response) => {
+                if (notification_response.ok) {
+                  console.log(notification_response);
+                }
+                else {
+                  console.error('Error:', notification_response.status, notification_response);
+                }
+              })
+              .catch((notification_error) => {
+                console.error('Error sending notification:', notification_error);
               });
-          }
+          };
 
           props.updateTable();
           handleCloseModal();
@@ -155,7 +164,9 @@ export default function CasesTable(props) {
       .catch((error) => {
         console.error('Error:', error);
       });
-  };
+
+
+  }
 
   let isAcceptButtonDisabled = false;
   let isCancelButtonDisabled = false;

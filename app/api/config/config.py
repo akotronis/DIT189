@@ -1,26 +1,22 @@
 import os
-import secrets
 
 
 class Config:
     DEBUG = False
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    API_TITLE = 'BookAPI'
+    API_TITLE = 'DIT189'
     API_VERSION = 'v1'
     OPENAPI_VERSION = '3.0.2'
     OPENAPI_URL_PREFIX = "/"
     OPENAPI_SWAGGER_UI_PATH = "/swagger-ui"
     OPENAPI_SWAGGER_UI_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+    OPENAPI_REDOC_PATH = "/redoc"
+    OPENAPI_REDOC_URL = "https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"
     SECRET_KEY = os.getenv('SECRET_KEY')
-    # Keycloak
-    OIDC_CLIENT_SECRETS = os.path.join(os.getcwd(), 'api', 'client_secrets.json')
-    OIDC_OPENID_REALM = 'DemoRealm'
-    # 'OIDC_INTROSPECTION_AUTH_METHOD': 'bearer'
-    # 'OIDC_INTROSPECTION_AUTH_METHOD': 'client_secret_post'
-    OIDC_SCOPES = ['openid', 'email', 'profile']
-    # 'OIDC_TOKEN_TYPE_HINT': 'access_token'
-    # 'OIDC_RESOURCE_SERVER_ONLY': True
+    # Required for ordered=True to work in Schemas Meta classes
+    JSON_SORT_KEYS = False
+
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('PROD_DATABASE_URL')

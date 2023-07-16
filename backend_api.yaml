@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-api
+  template:
+    metadata:
+      labels:
+        app: backend-api
+    spec:
+      containers:
+        - name: backend-api-container
+          image: docker.io/paanastasiadis/api-img
+          ports:
+            - containerPort: 5000
+          env:
+          # main app page
+            - name: HOST_MAIN_URL
+              value: backend-api-service
+          # Postgres configs
+            - name: DEV_DATABASE_URL
+              value: postgresql://postgres:postgres@postgres-api-db-service/api-db
+            # Keycloak host
+            - name: KEYCLOAK_URI
+              value: keycloak-service
+            # Keycloak Admin
+            - name: ADMIN_REALM
+              value: master
+            - name: ADMIN_CLIENT_ID
+              value: admin-cli
+            - name: KEYCLOACK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: password
+            # Keycloak DIT189 Realm
+            - name: REALM
+              value: DIT189
+            - name: CLIENT_ID
+              value: DIT189-Backend-Client
+            - name: CLIENT_SECRET
+              value: rWoAm1Ng0GAAte1N4iiFk9Kpg94Ce6rU
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-api-service
+spec:
+  selector:
+    app: backend-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: NodePort

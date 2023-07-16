@@ -1,111 +1,124 @@
-version: '3.9'
+# version: '3.9'
 
-volumes:
-  users-db-data:
-  api-db-data:
+# volumes:
+#   users-db-data:
+#   api-db-data:
 
-services:
-  ############ APP DB #############
-  ##################################
-  api-db:
-    image: postgres:13.2
-    container_name: api-db-cont
-    restart: unless-stopped
-    ports:
-      - 5433:5432
-    volumes:
-      - api-db-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: ${API_DB}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${API_DB} -U ${DATABASE_USER}"]
-      interval: 10s
-      timeout: 8s
-      retries: 3
-      start_period: 5s
+# services:
+#   ############ API DB #############
+#   ##################################
+#   api-db:
+#     image: postgres:13.2
+#     container_name: api-db-cont
+#     restart: unless-stopped
+#     ports:
+#       - 5433:5432
+#     volumes:
+#       - api-db-data:/var/lib/postgresql/data
+#     environment:
+#       POSTGRES_DB: ${API_DB}
+#       POSTGRES_USER: ${DATABASE_USER}
+#       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -d ${API_DB} -U ${DATABASE_USER}"]
+#       interval: 10s
+#       timeout: 8s
+#       retries: 3
+#       start_period: 5s
 
-  ############# KEYCLOACK/USERS DB #############
-  #############################################
-  # The service name has to be `postgres`
-  postgres:
-    image: postgres:13.2
-    container_name: users-db-cont
-    restart: unless-stopped
-    ports:
-      - 5432:5432
-    volumes:
-      - users-db-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: ${USERS_DB}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${USERS_DB} -U ${DATABASE_USER}"]
-      interval: 10s
-      timeout: 8s
-      retries: 3
-      start_period: 5s
-    depends_on:
-      api-db:
-          condition: service_healthy
+#   ############# KEYCLOACK/USERS DB #############
+#   #############################################
+#   # The service name has to be `postgres`
+#   postgres:
+#     image: postgres:13.2
+#     container_name: users-db-cont
+#     restart: unless-stopped
+#     ports:
+#       - 5432:5432
+#     volumes:
+#       - users-db-data:/var/lib/postgresql/data
+#     environment:
+#       POSTGRES_DB: ${USERS_DB}
+#       POSTGRES_USER: ${DATABASE_USER}
+#       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+#     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
+#     healthcheck:
+#       test: ["CMD-SHELL", "pg_isready -d ${USERS_DB} -U ${DATABASE_USER}"]
+#       interval: 10s
+#       timeout: 8s
+#       retries: 3
+#       start_period: 5s
+#     depends_on:
+#       api-db:
+#           condition: service_healthy
 
-  ################# KEYCLOACK #################
-  #############################################
-  keycloak-srv:
-    image: jboss/keycloak:13.0.0
-    container_name: keycloak-cont
-    restart: unless-stopped
-    ports:
-      - 8080:8080
-    environment:
-      # The values of the 2 below env variables must not be changed
-      DB_VENDOR: postgres
-      DB_ADDR: postgres
-      DB_DATABASE: ${USERS_DB}
-      DB_USER: ${DATABASE_USER}
-      DB_PASSWORD: ${DATABASE_PASSWORD}
-      KEYCLOAK_USER: ${KEYCLOAK_ADMIN_USER}
-      KEYCLOAK_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      # KEYCLOAK_HOSTNAME: keycloak-srv
-    healthcheck:
-      test: curl --fail http://keycloak-srv:8080 || exit 1
-      interval: 10s
-      timeout: 8s
-      retries: 7
-      start_period: 5s
-    depends_on:
-      postgres:
-        condition: service_healthy
+#   ################# KEYCLOACK #################
+#   #############################################
+#   keycloak-srv:
+#     image: quay.io/keycloak/keycloak:21.1.1
+#     container_name: keycloak-cont
+#     restart: unless-stopped
+#     ports:
+#       - 8080:8080
+#     environment:
+#       #### Keycloak Related vars ####
+#       # This is required
+#       KC_PROXY: edge
+#       # Avoid `XA enabled but transaction recovery is not enabled` dataloss warning
+#       KC_TRANSACTION_XA_ENABLED: false
+#       KC_HOSTNAME_STRICT: false
+#       KC_HOSTNAME_STRICT_HTTPS: false
+#       # Admin user credentials
+#       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+#       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
 
-  #################### API ####################
-  #############################################
-  api:
-    image: api-img
-    build: .
-    container_name: api-cont
-    restart: always
-    ports:
-      - 5000:5000
-    volumes:
-      - ./:/usr/data/app
-    environment:
+#       #### Database Related vars ####
+#       KC_DB_USERNAME: ${DATABASE_USER}
+#       KC_DB_PASSWORD: ${DATABASE_PASSWORD}
+#     entrypoint: 
+#       [
+#         "/opt/keycloak/bin/kc.sh",
+#         "start",
+#         "--health-enabled=true",
+#         "--db postgres",
+#         "--db-url jdbc:postgresql://postgres/${USERS_DB}"
+#       ]
+#     # HEALTHCHECKS
+#     # - https://www.keycloak.org/server/health
+#     # - https://stackoverflow.com/questions/75693830/keycloak-v21-docker-container-health-check-failing
+#     # - https://github.com/ubaid4j/api-gateway-with-multiple-oidc-clients
+#     # - https://github.com/ubaid4j/api-gateway-with-multiple-oidc-clients/blob/main/src/main/docker/compose.yaml
+#     # - https://github.com/ubaid4j/api-gateway-with-multiple-oidc-clients/blob/main/src/main/docker/keycloak/health-check.sh
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
 
-      # Keycloak
-      KEYCLOAK_AUTH_URI: http://keycloak-srv:8080/auth
-      HOST_MAIN_URL: http://localhost:5000
-      REALM: ${REALM}
-      # CLIENT_ID: ${CLIENT_ID}
-      # CLIENT_SECRET: ${CLIENT_SECRET}
-      # OPENID_URL: http://keycloak-srv:8080/auth/realms/${REALM}/protocol/openid-connect/auth
-      # ADMIN_USER: ${KEYCLOAK_USER}
-      # ADMIN_PASS: ${KEYCLOAK_PASSWORD}
-      # Main-db
-      DEV_DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@api-db/${API_DB}
-    depends_on:
-      keycloak-srv:
-        condition: service_healthy
-      
+#   #################### API ####################
+#   #############################################
+#   api:
+#     image: api-img
+#     build: .
+#     container_name: api-cont
+#     restart: always
+#     ports:
+#       - 5000:5000
+#     volumes:
+#       - ./:/usr/data/app
+#     command: /bin/bash entrypoint.sh
+#     environment:
+#       # App main page
+#       HOST_MAIN_URL: http://localhost:5000
+#       # Keycloak
+#       KEYCLOAK_URI: http://keycloak-srv:8080
+#       ADMIN_REALM: master
+#       ADMIN_CLIENT_ID: admin-cli
+#       REALM: ${REALM}
+#       CLIENT_ID: ${CLIENT_ID}
+#       CLIENT_SECRET: ${CLIENT_SECRET}
+#       KEYCLOACK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+#       KEYCLOACK_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+#       # Api-db
+#       DEV_DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@api-db/${API_DB}
+#     depends_on:
+#       - keycloak-srv
 

@@ -1,13 +1,12 @@
 import requests
 from . import app
-from .database import DataBase
+from .database import DataBase as DB
 
 
 def initialize_db():
     with app.app_context():
-        db = DataBase()
-        db.create_tables()
-        db.initialize()
+        DB.create_tables()
+        DB.initialize()
 
 if __name__ == '__main__':
     initialize_db()

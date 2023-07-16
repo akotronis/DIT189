@@ -1,20 +1,17 @@
-from flask import Flask, request
-from flask_cors import CORS
-from flask_cors import cross_origin
+from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 from flask_mail import Mail, Message
 import json
 
 app = Flask(__name__)
-# CORS(app)
+cors = CORS(app)
+mail = Mail(app)
 
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['MAIL_SERVER'] = 'mailhog'
 app.config['MAIL_PORT'] = 1025
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = False
-
-mail = Mail(app)
-
-CORS(app, support_credentials=True)
 
 sender_email = "consensual.divorce@gmail.com"
 
@@ -27,8 +24,7 @@ states = {
     "FINALIZED": "Divorce {divorce} is now finalized."
 }
 
-
-@app.route('/send-email', methods=['POST'])
+@app.route('/send-email', methods=['POST', 'OPTIONS'])
 @cross_origin()
 def send_email():
     
@@ -37,12 +33,14 @@ def send_email():
     if "state" in data:
         state = data["state"]
     else:
-        return "No state specified!"
+        response = {"error": "No state specified!"}
+        return jsonify(response), 400
     
     if "divorce" in data:
         divorce = data["divorce"]
     else:
-        return "No divorce specified!"
+        response = {"error": "No divorce specified!"}
+        return jsonify(response), 400
 
     if "user" in data:
         user = data["user"]
@@ -50,32 +48,39 @@ def send_email():
         if "name" in user:
             name = user["name"]
         else:
-            return "No name of user specified!"
+            response = {"error": "No name of user specified!"}
+            return jsonify(response), 400
         
         if "surname" in user:
             surname = user["surname"]
         else:
-            return "No name of surname specified!"
+            response = {"error": "No name of surname specified!"}
+            return jsonify(response), 400
         
         if "role" in user:
             role = user["role"]
         else:
-            return "No role of user specified!"
+            response = {"error": "No role of user specified!"}
+            return jsonify(response), 400
 
         if "email" in user:
             email = user["email"]
         else:
-            return "No email of user specified!"
+            response = {"error": "No email of user specified!"}
+            return jsonify(response), 400
     else:
-        return "No user specified!"
+        response = {"error": "No user specified!"}
+        return jsonify(response), 400
 
     if "recipients" in data:
         recipients = data["recipients"]
         if(len(recipients) == 0):
-            return "No recipients specified!"
+            response = {"error": "No recipients specified!"}
+            return jsonify(response), 400
         recipients.insert(0, email)
     else:
-        return "No recipients specified!"
+        response = {"error": "No recipients specified!"}
+        return jsonify(response), 400
     
     msg = Message(state, sender=sender_email, recipients=recipients)
    
@@ -92,15 +97,18 @@ def send_email():
         temp = temp.replace("{divorce}", divorce)
         msg.body = temp
     else:
-        return "Unknown state!"
+        response = {"error": "Unknown state!"}
+        return jsonify(response), 400
 
     msg.body = msg.body.replace("{divorce}", divorce)
 
     try:
         mail.send(msg)
-        return "Email sent successfully!"
+        response = {"message": "Email sent successfully!"}
+        return jsonify(response), 200
     except Exception as e:
-        return "An error occurred while sending the email: " + str(e)
+        response = {"error": "An error occurred while sending the email: " + str(e)}
+        return jsonify(response), 400
     
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5050)

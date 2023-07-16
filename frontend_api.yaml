@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-api
+  template:
+    metadata:
+      labels:
+        app: frontend-api
+    spec:
+      containers:
+        - name: frontend-api-container
+          image: docker.io/paanastasiadis/edivorce-ui:latest
+          ports:
+            - containerPort: 80
+          # env:
+            # - name: REACT_APP_BACKEND_API_URL
+            #   value: backend-api-service
+            # - name: REACT_APP_KEYCLOAK_URL
+            #   value: keycloak-service
+            # - name: REACT_APP_KEYCLOAK_REALM
+            #   value: DIT189
+            # - name: REACT_APP_KEYCLOAK_CLIENT_ID
+            #   value: edivorce-frontend
+            # - name: REACT_APP_KEYCLOAK_CLIENT_SECRET
+            #   value: LlgDke8XNsI9qscSTF59j1yQgFAfsHRB
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-api-service
+spec:
+  selector:
+    app: frontend-api
+  ports:
+    - name: frontend-api
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
