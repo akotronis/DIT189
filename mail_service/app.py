@@ -5,7 +5,6 @@ import json
 
 app = Flask(__name__)
 cors = CORS(app)
-mail = Mail(app)
 
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['MAIL_SERVER'] = 'mailhog'
@@ -13,7 +12,9 @@ app.config['MAIL_PORT'] = 1025
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = False
 
-sender_email = "consensual.divorce@gmail.com"
+mail = Mail(app)
+
+sender_email = "consensual.divorce@example.com"
 
 states = {
     "INITIALIZED": "Divorce {divorce} was initialized by {role} {name} {surname}.",
@@ -24,7 +25,7 @@ states = {
     "FINALIZED": "Divorce {divorce} is now finalized."
 }
 
-@app.route('/send-email', methods=['POST', 'OPTIONS'])
+@app.route('/send-email', methods=['POST'])
 @cross_origin()
 def send_email():
     
@@ -68,6 +69,7 @@ def send_email():
         else:
             response = {"error": "No email of user specified!"}
             return jsonify(response), 400
+            
     else:
         response = {"error": "No user specified!"}
         return jsonify(response), 400
@@ -77,10 +79,12 @@ def send_email():
         if(len(recipients) == 0):
             response = {"error": "No recipients specified!"}
             return jsonify(response), 400
+            
         recipients.insert(0, email)
     else:
         response = {"error": "No recipients specified!"}
         return jsonify(response), 400
+        
     
     msg = Message(state, sender=sender_email, recipients=recipients)
    
@@ -99,13 +103,12 @@ def send_email():
     else:
         response = {"error": "Unknown state!"}
         return jsonify(response), 400
-
-    msg.body = msg.body.replace("{divorce}", divorce)
-
+        
     try:
         mail.send(msg)
         response = {"message": "Email sent successfully!"}
         return jsonify(response), 200
+    
     except Exception as e:
         response = {"error": "An error occurred while sending the email: " + str(e)}
         return jsonify(response), 400
