@@ -13,7 +13,7 @@ kclk = KeycloakAPI()
 
 @blp.route('/users')
 class UserList(MethodView):
-    @kclk.token_required('lawyer')
+    @kclk.token_required()
     @blp.arguments(UserInputSchema, location='query')
     @blp.response(200, UserSchema(many=True))
     def get(self, query_args):
