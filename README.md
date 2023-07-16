@@ -71,6 +71,7 @@ Implemented with [`marshmallow`](https://marshmallow.readthedocs.io/en/stable/)
 
 - `/users` &rarr; **GET**: Return all users in flask app db
 - `/users` &rarr; **POST**: Create a user with a specific role in Keycloak
+- `/users/<user_id>` &rarr; **GET**: Get an api db user's token if user is in Keycloak
 
 #### Marriages
 
@@ -89,7 +90,8 @@ Implemented with [`marshmallow`](https://marshmallow.readthedocs.io/en/stable/)
 
 #### Refresh
 
-- `/refresh` &rarr; **GET**: Repopulates the flask app database with users and marriages (for development/presentation purposes).
+- `/refresh` &rarr; **GET**: Repopulates the flask app database with users and marriages (for development/presentation purposes)  
+  If `drop` query param is set to `False`, it just returns all the users with their attributes, so we can test use cases.
 
 #### Documentation
 
